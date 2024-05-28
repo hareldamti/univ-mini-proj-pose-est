@@ -1,5 +1,5 @@
-#include <windows.h>		    // Header File For Windows
-#include <stdio.h>			// Header File For Standard Input/Output
+#pragma once
+#include "utils.h"
 
 typedef struct WindowState {
     int     width = 800;
@@ -22,9 +22,11 @@ typedef struct InputState {
     int     mouseY;
 } InputState;
 
-class AppState {
+
+
+class State {
     public:
-        AppState(int width, int height, bool fullscreen = false);
+        State(int width, int height, bool fullscreen = false);
         WindowState window;
         InputState input;
         void handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -1,9 +1,9 @@
-#include "AppState.h"
+#include "State.h"
 
-AppState::AppState(int width, int height, bool fullscreen):
+State::State(int width, int height, bool fullscreen):
     window({width, height, fullscreen}) {}
 
-void AppState::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)									// Check For Windows Messages
 	{
 		case WM_ACTIVATE:							// Watch For Window Activate Message
@@ -69,7 +69,7 @@ void AppState::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     }
 }
 
-bool AppState::isKeyPressed(int key) {
+bool State::isKeyPressed(int key) {
     if (input.keyPressed[key]) {
         input.keyPressed[key] = false;
         return true;
@@ -77,7 +77,7 @@ bool AppState::isKeyPressed(int key) {
     return false;
 }
 
-bool AppState::isMousePressed() {
+bool State::isMousePressed() {
     if (input.mousePressed) {
         input.mousePressed = false;
         return true;

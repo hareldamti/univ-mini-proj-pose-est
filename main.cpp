@@ -1,11 +1,10 @@
-#include "AppState.h"
-#include <math.h>			// Math Library Header File
-#include <gl\gl.h>			// Header File For The OpenGL32 Library
-#include <gl\glu.h>			// Header File For The GLu32 Library
 #include <chrono>
 #include <thread>
+#include "State.h"
+#include "Program.h"
 
-AppState state(800, 600, false);
+State state(800, 600, false);
+Program program(state);
 
 int initGL(GLvoid)										// All Setup For OpenGL Goes Here
 {
@@ -22,8 +21,6 @@ int initGL(GLvoid)										// All Setup For OpenGL Goes Here
 	glEnable(GL_DEPTH_TEST);							// Enables Depth Testing
 	glShadeModel(GL_SMOOTH);							// Enables Smooth Color Shading
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
-
-	// SetupWorld();
 
 	return TRUE;										// Initialization Went OK
 }
@@ -188,7 +185,6 @@ bool createGLWindow(const char* title, int width, int height, bool fullscreenfla
 		MessageBox(NULL,(LPCSTR)"Window Creation Error.",(LPCSTR)"ERROR",MB_OK|MB_ICONEXCLAMATION);
 		return FALSE;								// Return FALSE
 	}
-
 	PIXELFORMATDESCRIPTOR pfd=				// pfd Tells Windows How We Want Things To Be
 	{
 		sizeof(PIXELFORMATDESCRIPTOR),				// Size Of This Pixel Format Descriptor
@@ -239,7 +235,7 @@ bool createGLWindow(const char* title, int width, int height, bool fullscreenfla
 		return FALSE;								// Return FALSE
 	}
 
-	if(!wglMakeCurrent(state.window.hDC,state.window.hRC))					// Try To Activate The Rendering Context
+	if(!(wglMakeCurrent(state.window.hDC,state.window.hRC) && gladLoadGL()))					// Try To Activate The Rendering Context
 	{
 		killGLWindow();								// Reset The Display
 		MessageBox(NULL,(LPCSTR)"Can't Activate The GL Rendering Context.",(LPCSTR)"ERROR",MB_OK|MB_ICONEXCLAMATION);
@@ -250,7 +246,6 @@ bool createGLWindow(const char* title, int width, int height, bool fullscreenfla
 	SetForegroundWindow(state.window.hWnd);						// Slightly Higher Priority
 	SetFocus(state.window.hWnd);								// Sets Keyboard Focus To The Window
 	ResizeGLScene(state.window.width, state.window.height);		// Set Up Our Perspective GL Screen
-
 	if (!initGL())									// Initialize Our Newly Created GL Window
 	{
 		killGLWindow();								// Reset The Display
@@ -267,27 +262,25 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 					int			nCmdShow)			// Window Show State
 {
     state.window.shouldQuit = !createGLWindow("Pose Estimation", 800, 600);
-    MSG		msg;
+	program.init();
+	MSG	msg;
     while (!state.window.shouldQuit) {
-
-        if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
+		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
 		{
-			if (msg.message==WM_QUIT)				// Have We Received A Quit Message?
+			if (msg.message==WM_QUIT)				
+				state.window.shouldQuit = true;		
+			else									
 			{
-				state.window.shouldQuit = true;		// If So done=TRUE
-			}
-			else									// If Not, Deal With Window Messages
-			{
-				TranslateMessage(&msg);				// Translate The Message
-				DispatchMessage(&msg);				// Dispatch The Message
+				TranslateMessage(&msg);				
+				DispatchMessage(&msg);				
 			}
 		}
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear The Screen And The Depth Buffer
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
+		program.update();
+		program.draw();
+		Sleep(40);
 		SwapBuffers(state.window.hDC);
-
-		Sleep(1);
-		
     };
     // Shutdown
 	killGLWindow();										// Kill The Window
