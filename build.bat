@@ -1,0 +1,1 @@
+gcc -g -o pose-est.exe main.cpp src/*.cpp -Iinclude/ -lopengl32 -lglu32 -lgdi32
