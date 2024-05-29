@@ -3,11 +3,11 @@
 
 class Program {
     private:
-        State m_state;
+        State& m_state;
         // global variables
 
     public:
-        Program(State state);
+        Program(State& state);
         void init();
         void update();
         void draw();

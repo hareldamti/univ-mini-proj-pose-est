@@ -6,6 +6,8 @@
 #include <gl\gl.h>	
 #include <gl\glu.h>	
 #include <glm/glm.hpp>
+#include <glm/vec3.hpp>
+
 #include <glm/ext/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale
 #include <glm/gtc/type_ptr.hpp>
 

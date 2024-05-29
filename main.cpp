@@ -261,7 +261,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 					LPSTR		lpCmdLine,			// Command Line Parameters
 					int			nCmdShow)			// Window Show State
 {
-    state.window.shouldQuit = !createGLWindow("Pose Estimation", 800, 600);
+    state.window.shouldQuit = !createGLWindow("Pose Estimation", state.window.width, state.window.height);
 	program.init();
 	MSG	msg;
     while (!state.window.shouldQuit) {
@@ -279,7 +279,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 		glLoadIdentity();
 		program.update();
 		program.draw();
-		Sleep(40);
+		Sleep(10);
 		SwapBuffers(state.window.hDC);
     };
     // Shutdown

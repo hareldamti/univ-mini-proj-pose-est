@@ -30,18 +30,18 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			return;					    			// Jump Back
 		}
 
-		case WM_KEYDOWN:							// Is A Key Being Held Down?
+		case WM_KEYDOWN:							
 		{
             input.keyPressed[wParam] = true;
-			input.keyState[wParam] = TRUE;			
+			input.keyState[wParam] = true;		
 			return;
 		}
 
-		case WM_KEYUP:								// Has A Key Been Released?
+		case WM_KEYUP:								
 		{
-			input.keyState[wParam] = FALSE;			// If So, Mark It As FALSE
+			input.keyState[wParam] = false;			
             //input.keyPressed[wParam] = FALSE;
-			return;				    				// Jump Back
+			return;				    				
 		}
 	
         case WM_LBUTTONDOWN: 

@@ -1,7 +1,7 @@
 #include "Program.h"
 #include <glad.h>
 
-Program::Program(State state) : m_state(state) {}
+Program::Program(State& state) : m_state(state) {}
 
 float vertices[] = {
      0.5f,  0.5f, 0.0f,  // top right
@@ -16,9 +16,11 @@ unsigned int indices[] = {  // note that we start from 0!
 unsigned int VBO;
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "uniform mat4 transform;"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = transform * vec4(aPos, 1)\n;"
+    //"   gl_Position /= gl_Position.z + .1;\n"
     "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
@@ -31,17 +33,12 @@ unsigned int shaderProgram;
 
 unsigned int VAO;
 unsigned int EBO;
+unsigned int transformLoc;
 
-glm::mat4 camera(glm::vec3 const& position, glm::vec3 const& rotation)
-{
-	glm::mat4 Projection = glm::perspective(glm::pi<float>() * 0.25f, 4.0f / 3.0f, 0.1f, 100.f);
-	glm::mat4 View = glm::translate(glm::mat4(1.0f), position);
-    View = glm::rotate(View, rotation.x, glm::vec3(-1.0f, 0.0f, 0.0f));
-	View = glm::rotate(View, rotation.y, glm::vec3(0.0f, -1.0f, 0.0f));
-	View = glm::rotate(View, rotation.z, glm::vec3(0.0f, 1.0f, -1.0f));
-	glm::mat4 Model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-	return Projection * View * Model;
-}
+glm::vec4 pos(0.0f);
+glm::vec3 rot(0.0f);
+glm::mat4 dir;
+float v = 0.05f, vr = 0.01f;
 
 void Program::init() {
 	GLCall(glGenBuffers(1, &VBO)); 
@@ -100,11 +97,47 @@ void Program::init() {
 
     GLCall(glEnableVertexAttribArray(0)); 
     
+    GLSet(transformLoc, glGetUniformLocation(shaderProgram, "transform"));
+
+    pos.z = -.5;
 }
 
 void Program::update() {
-    vertices[2] += 1;
-    vertices[5] += 1;
+
+    dir = glm::rotate(glm::mat4(1.0f), rot.y, glm::vec3(1,0,0));
+    dir = glm::rotate(dir, rot.x, glm::vec3(0,1,0));
+
+    if (m_state.input.keyState['W']) {pos += v * dir * glm::vec4(0,0,1,0);}
+    if (m_state.input.keyState['S']) {pos -= v * dir * glm::vec4(0,0,1,0);}
+    
+    if (m_state.input.keyState[VK_LEFT]) {rot.x += vr;}
+    if (m_state.input.keyState[VK_RIGHT]) {rot.x -= vr;}
+
+    if (m_state.input.keyState[VK_UP]) {rot.y +=  vr;}
+    if (m_state.input.keyState[VK_DOWN]) {rot.y -= vr;}
+
+    if (m_state.input.keyState[VK_OEM_COMMA]) {rot.z +=  vr;}
+    if (m_state.input.keyState[VK_OEM_PERIOD]) {rot.z -= vr;}
+
+
+    glm::mat4 cam = glm::mat4(1.0f);
+    cam =  glm::rotate(cam, rot.z, glm::vec3(0,0,1));
+    cam = glm::rotate(cam, -rot.y, glm::vec3(1,0,0));
+    cam = glm::rotate(cam, -rot.x, glm::vec3(0,1,0));
+    
+    cam = glm::translate(cam, glm::vec3(pos.x, pos.y, pos.z));
+    cam = glm::perspective(45.0f, 4.0f/3, 0.1f, 100.0f) * cam;
+    
+    
+    
+
+    if (false) LOG_DEBUG("\n%f %f %f %f \n%f %f %f %f \n%f %f %f %f \n%f %f %f %f\n",
+    cam[0][0],cam[0][1],cam[0][2],cam[0][3],
+    cam[1][0],cam[1][1],cam[1][2],cam[1][3],
+    cam[2][0],cam[2][1],cam[2][2],cam[2][3],
+    cam[3][0],cam[3][1],cam[3][2],cam[3][3]);
+    
+    GLCall(glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(cam)));
 }
 
 void Program::draw() {
@@ -113,5 +146,5 @@ void Program::draw() {
     GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
     GLCall(glBindVertexArray(0));
 
-    // Wireframe glPolygonMode(GL_FRONT_AND_BACK, GL_LINE ///// GL_FILL); 
+    // Wireframe: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE ///// GL_FILL); 
 }
