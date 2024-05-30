@@ -1,5 +1,12 @@
 #include "utils.h"
 
+std::string readFile(const std::string& file_path) {
+    std::ifstream stream(file_path);
+    std::string data((std::istreambuf_iterator<char>(stream)),
+                 std::istreambuf_iterator<char>());
+    return data;
+}
+
 void _glClearError() {
     while(glGetError() != GL_NO_ERROR);
 }

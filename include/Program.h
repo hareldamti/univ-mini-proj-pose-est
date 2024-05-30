@@ -1,9 +1,10 @@
 #pragma once
-#include "State.h"
+#include "Render.h"
 
 class Program {
     private:
         State& m_state;
+        Render m_render;
         // global variables
 
     public:
