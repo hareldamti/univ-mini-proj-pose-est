@@ -86,11 +86,16 @@ void Render::setUniform(const std::string& name, float value) {
 
 void Render::setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov) {
     glm::mat4 cam = glm::mat4(1.0f);
-    cam =  glm::rotate(cam, rot.z, glm::vec3(0,0,1));
-    cam = glm::rotate(cam, -rot.y, glm::vec3(1,0,0));
-    cam = glm::rotate(cam, -rot.x, glm::vec3(0,1,0));
-    cam = glm::translate(cam, glm::vec3(pos.x, pos.y, pos.z));
-    cam = glm::perspective(45.0f, 4.0f/3, 0.1f, 100.0f) * cam;
+    cam = glm::rotate(cam, rot.z, glm::vec3(0.0f,0.0f,1.0f));
+    cam = glm::rotate(cam, -rot.y, glm::vec3(1.0f,0.0f,0.0f));
+    cam = glm::rotate(cam, -rot.x, glm::vec3(0.0f,1.0f,0.0f));
+    cam = glm::translate(cam, pos);
+    glm::mat4 proj = glm::perspective(
+        fov,
+        (float) m_state.window.width / m_state.window.height,
+        0.1f, 100.0f
+        ) * cam;
+    
     setUniform("camera", cam);
 }
 
