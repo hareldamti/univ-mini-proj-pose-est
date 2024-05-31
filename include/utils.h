@@ -1,6 +1,8 @@
 #pragma once
 #include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <fstream>
 #include <math.h>
 #include "glad/glad.h"
 #include <gl\gl.h>	
