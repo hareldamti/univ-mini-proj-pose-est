@@ -38,22 +38,25 @@ u32 linkShaderProgram(u32 shader_id1, u32 shader_id2) {
 }
 
 Render::Render(State& state) : m_state(state) {
-    GLCall(glGenBuffers(1, &VBO)); 
-    GLCall(glGenBuffers(1, &EBO));
-    GLCall(glGenVertexArrays(1, &VAO));
 }
 
 void Render::createProgram(const std::string& vertexFile, const std::string& fragmentFile) {
+    GLCall(glGenBuffers(1, &VBO)); 
+    GLCall(glGenBuffers(1, &EBO));
+    GLCall(glGenVertexArrays(1, &VAO));
     std::string vertexSource = readFile(vertexFile);
     std::string fragmentSource = readFile(fragmentFile);
     u32 vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
     u32 fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
     shaderProgram = linkShaderProgram(vertexShader, fragmentShader);
     GLCall(glBindVertexArray(VAO));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+    glBufferData(GL_ARRAY_BUFFER, 5 * VERTEX_BUFFER_SIZE * sizeof(f32), (void*)0, GL_DYNAMIC_DRAW);
     GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
     GLCall(glEnableVertexAttribArray(0)); 
-    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)3));
-    GLCall(glEnableVertexAttribArray(1)); 
+    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
+    GLCall(glEnableVertexAttribArray(1));
+
     GLCall(glDeleteShader(vertexShader));
     GLCall(glDeleteShader(fragmentShader)); 
     setUniform("camera", glm::mat4(1.0f));
@@ -65,7 +68,7 @@ void Render::setIndices(const u32* indices, const u32 n) {
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * n, indices, GL_STATIC_DRAW));
 }
 
-void Render::setVertices(const f32* vertices, const u32 n) {
+void Render::setVertices(const f32* vertices, const i32 n) {
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO)); 
     GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(f32) * n * 5, vertices));
 }
@@ -96,7 +99,7 @@ void Render::setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov) {
         0.1f, 100.0f
         ) * cam;
     
-    setUniform("camera", cam);
+    setUniform("camera", proj);
 }
 
 void Render::render() {

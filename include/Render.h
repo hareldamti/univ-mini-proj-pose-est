@@ -1,6 +1,8 @@
 #pragma once
 #include "State.h"
 
+#define VERTEX_BUFFER_SIZE 1e5
+
 class Render {
     private:
         State& m_state;
@@ -14,7 +16,7 @@ class Render {
         Render(State& state);   
         void createProgram(const std::string& vertexFile, const std::string& fragmentFile);
         void setIndices(const u32* indices, const u32 n);
-        void setVertices(const f32* vertices, const u32 n);
+        void setVertices(const f32* vertices, const i32 n);
         void setUniform(const std::string& name, const glm::mat4& value);
         void setUniform(const std::string& name, float value);
         void setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov);

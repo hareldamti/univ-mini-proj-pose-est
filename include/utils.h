@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include <string>
 #include <math.h>
+#include <map>
 #include "glad/glad.h"
 #include <gl\gl.h>	
 #include <gl\glu.h>	
@@ -40,3 +42,5 @@ typedef double f64;
 void _glClearError();
 bool _glCatchError(const char* func_name, const char* file, int line);
 std::string readFile(const std::string& file_path);
+
+
