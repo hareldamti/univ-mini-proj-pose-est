@@ -9,6 +9,7 @@ u32 compileShader(const std::string& glsl_code, u32 shader_type) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
     if (success == GL_FALSE) {
+
         int length;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
         char msg[512];
