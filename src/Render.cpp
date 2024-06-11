@@ -37,8 +37,8 @@ u32 linkShaderProgram(u32 shader_id1, u32 shader_id2) {
     return program;
 }
 
-Render::Render(State& state) : m_state(state) {
-}
+Render::Render(State& state) :
+    m_state(state), x(0), y(0), width(state.window.width), height(state.window.height){}
 
 void Render::createProgram(const std::string& vertexFile, const std::string& fragmentFile) {
     GLCall(glGenBuffers(1, &VBO)); 
@@ -95,15 +95,22 @@ void Render::setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov) {
     cam = glm::translate(cam, pos);
     glm::mat4 proj = glm::perspective(
         fov,
-        (float) m_state.window.width / m_state.window.height,
+        (float) width / height,
         0.1f, 100.0f
         ) * cam;
     
     setUniform("camera", proj);
 }
 
+void Render::viewport(int x, int y, int width, int height){
+    this->x = x;
+    this->y = y;
+    this->width = width;
+    this->height = height;
+}
+
 void Render::render() {
-    GLCall(glViewport(0, 0, 800, 600));
+    GLCall(glViewport(x, y, width, height));
     GLCall(glUseProgram(shaderProgram));
     GLCall(glBindVertexArray(VAO));
     GLCall(glDrawElements(GL_TRIANGLES, nVertices, GL_UNSIGNED_INT, 0));

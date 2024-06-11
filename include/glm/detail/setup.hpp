@@ -309,11 +309,11 @@
 		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC15))))
 #endif
 
-#if GLM_HAS_CONSTEXPR
-#	define GLM_CONSTEXPR constexpr
-#else
-#	define GLM_CONSTEXPR
-#endif
+//#if GLM_HAS_CONSTEXPR
+//#	define GLM_CONSTEXPR constexpr
+//#else
+#define GLM_CONSTEXPR
+//#endif
 
 //
 #if GLM_HAS_CONSTEXPR
