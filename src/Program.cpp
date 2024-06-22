@@ -3,17 +3,16 @@
 
 
 
-Program::Program(State& state) : m_state(state), m_render(state), m_terrain(10, 1.f){}
+Program::Program(State& state) : m_state(state), m_render(state), m_terrain(10, 5){}
 glm::vec4 pos(0.0f);
 glm::mat4 rot(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0)));
 float v = 0.05f, vr = 0.01f;
 
 void Program::init() {
-    m_terrain.loadTexture("IMG-0458.png", 200);
+    m_terrain.loadTexture("IMG-0458.png", 50);
     m_render.createProgram("shaders/default.vert", "shaders/default.frag");
     m_render.setIndices(m_terrain.indices, m_terrain.indices_vec.size());
-    //m_tinted.createProgram("shaders/default.vert", "shaders/tinted.frag");
-    //m_tinted.setIndices(indices, 12);
+    LOG_DEBUG("%d %d", m_terrain.indices_vec.size(), m_terrain.vertices_vec.size())
     pos.z = -10;
 }
 
@@ -43,7 +42,6 @@ void Program::update() {
         Intersection intersection = Picking::pickAboo(camera_pos, m_state.input.mouseX, m_state.input.mouseY, m_state.window.width, m_state.window.height, m_terrain);
         Picking::printIntersection(intersection);
     }
-
 }
 
 void Program::draw() {
@@ -51,8 +49,8 @@ void Program::draw() {
     m_render.viewport(0, 0, m_state.window.width, m_state.window.height);
     m_render.setCamera(pos, rot, 45.0f);
     m_render.setVertices(m_terrain.vertices, m_terrain.vertices_vec.size() / 5);
-    //glBindTexture(GL_TEXTURE_2D, terrain.texture);
-    m_render.render(GL_LINES);
+    glBindTexture(GL_TEXTURE_2D, m_terrain.texture);
+    m_render.render(GL_TRIANGLES);
 }
 
 
