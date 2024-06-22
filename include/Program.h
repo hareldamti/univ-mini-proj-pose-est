@@ -4,7 +4,7 @@
 class Program {
     private:
         State& m_state;
-        Render m_render;
+        Render m_render, m_tinted;
         // global variables
 
     public:

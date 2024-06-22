@@ -1,6 +1,6 @@
 #include "Program.h"
 
-Program::Program(State& state) : m_state(state), m_render(state){}
+Program::Program(State& state) : m_state(state), m_render(state), m_tinted(state){}
 
 float vertices[] = {
      0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
@@ -29,11 +29,16 @@ float v = 0.05f, vr = 0.01f;
 void Program::init() {
     m_render.createProgram("shaders/default.vert", "shaders/default.frag");
     m_render.setIndices(indices, 12);
+    m_tinted.createProgram("shaders/default.vert", "shaders/tinted.frag");
+    m_tinted.setIndices(indices, 12);
     pos.z = -.5;
+    //glEnable(GL_BLEND);
+    
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 }
 
 void Program::update() {
-        dir = glm::rotate(glm::mat4(1.0f), rot.x, glm::vec3(0,1,0));
+    dir = glm::rotate(glm::mat4(1.0f), rot.x, glm::vec3(0,1,0));
     dir = glm::rotate(dir, rot.y, glm::vec3(1,0,0));
 
 
@@ -53,12 +58,25 @@ void Program::update() {
 
 void Program::draw() {
     m_render.setVertices(vertices, 8);
-    m_render.viewport(0, 0, 400, 600);
-    m_render.setCamera(pos, rot, 45.0f);
-    m_render.render();
-    m_render.viewport(400, 0, 400, 600);
+    m_render.viewport(0, 0, 800, 600);
     m_render.setCamera(pos, rot, 45.0f);
     m_render.render();
     
-    // Wireframe: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE ///// GL_FILL); 
+    // GLCall(glDisable(GL_DEPTH_TEST));
+    // GLCall(glEnable(GL_BLEND));
+    // GLCall(glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA));
+    // m_tinted.setVertices(vertices, 8);
+    // m_tinted.viewport(400, 0, 400, 600);
+    // m_tinted.setCamera(pos, rot, 45.0f);
+    // m_tinted.setUniform("tintColor", glm::vec4(0.f,0.f,1.f,1.f));
+    // m_tinted.render();
+    // m_tinted.setUniform("tintColor", glm::vec4(1.f,0.f,0.f,1.f));
+    // m_tinted.render();
+    // m_tinted.setUniform("tintColor", glm::vec4(0.f,1.f,0.f,1.f));
+    // m_tinted.render();
+    // GLCall(glEnable(GL_DEPTH_TEST));
+    // GLCall(glDisable(GL_BLEND));
+    // GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); ///// GL_FILL); 
 }

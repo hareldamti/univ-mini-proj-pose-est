@@ -19,6 +19,7 @@ class Render {
         void setVertices(const f32* vertices, const i32 n);
         void setUniform(const std::string& name, const glm::mat4& value);
         void setUniform(const std::string& name, float value);
+        void setUniform(const std::string& name, const glm::vec4& value);
         void setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov);
         void viewport(int x, int y, int width, int height);
         void render();
