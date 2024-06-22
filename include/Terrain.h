@@ -9,6 +9,12 @@
 #include "GraphicsUtils.h"
 #include "utils.h"
 
+typedef struct Triangle {
+    glm::vec3 a;
+    glm::vec3 b;
+    glm::vec3 c;
+} Triangle;
+
 class Terrain {
     public:
         Terrain(float xWidth, float height);

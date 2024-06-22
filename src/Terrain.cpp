@@ -70,9 +70,9 @@ void Terrain::loadTexture(const char* filename, int downsize) {
 
     // creating triangles vector
     for (int i =0 ; i < indices_vec.size(); i+=3){
-        Vec3 a = {vertices[indices[i]*5], vertices[indices[i]*5 + 1],vertices[indices[i]*5 + 2]};
-        Vec3 b = {vertices[indices[i+1]*5], vertices[indices[i+1]*5 + 1],vertices[indices[i+1]*5 + 2]};
-        Vec3 c = {vertices[indices[i+2]*5], vertices[indices[i+2]*5 + 1],vertices[indices[i+2]*5 + 2]};
+        glm::vec3 a = {vertices[indices[i]*5], vertices[indices[i]*5 + 1],vertices[indices[i]*5 + 2]};
+        glm::vec3 b = {vertices[indices[i+1]*5], vertices[indices[i+1]*5 + 1],vertices[indices[i+1]*5 + 2]};
+        glm::vec3 c = {vertices[indices[i+2]*5], vertices[indices[i+2]*5 + 1],vertices[indices[i+2]*5 + 2]};
         triangles.push_back({a,b,c});
     }
 

@@ -100,7 +100,7 @@ void Render::setUniform(const std::string& name, float value) {
     GLCall(glUniform1f(location, value));
 }
 
-void Render::setCamera(const glm::vec3& pos, const glm::vec3& dir, f32 fov) {
+void Render::setCamera(const glm::vec3& pos, const glm::vec3& dir) {
     glm::mat4 cam = glm::mat4(1.0f);
 
     cam = glm::rotate(cam, -dir.y, glm::vec3(1.0f,0.0f,0.0f));
@@ -110,7 +110,7 @@ void Render::setCamera(const glm::vec3& pos, const glm::vec3& dir, f32 fov) {
 
     cam = glm::translate(cam, -pos);
     glm::mat4 proj = glm::perspective(
-        fov,
+        CAMERA_FOV,
         (float) width / height,
         0.1f, 100.0f
         ) * cam;
@@ -118,13 +118,15 @@ void Render::setCamera(const glm::vec3& pos, const glm::vec3& dir, f32 fov) {
     setUniform("camera", proj);
 }
 
-void Render::setCamera(const glm::vec3& pos, const glm::mat4& rot, f32 fov) {
+void Render::setTexture(u32 textureId) {
+    GLCall(glBindTexture(GL_TEXTURE_2D, textureId));
+}
+
+void Render::setCamera(const glm::vec3& pos, const glm::mat4& rot) {
     glm::mat4 cam = glm::transpose(rot);
-
-
     cam = glm::translate(cam, -pos);
     glm::mat4 proj = glm::perspective(
-        fov,
+        CAMERA_FOV,
         (float) width / height,
         0.1f, 100.0f
         ) * cam;

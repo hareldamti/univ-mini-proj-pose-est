@@ -32,7 +32,6 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		case WM_KEYDOWN:							
 		{
-            input.keyPressed[wParam] = true;
 			input.keyState[wParam] = true;		
 			return;
 		}
@@ -40,7 +39,7 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case WM_KEYUP:								
 		{
 			input.keyState[wParam] = false;			
-            //input.keyPressed[wParam] = FALSE;
+            input.keyPressed[wParam] = false;
 			return;				    				
 		}
 	
@@ -48,7 +47,6 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         {
             SetCapture(window.hWnd); 
             input.mouseState = true;
-            input.mousePressed = true;
             SetCapture(window.hWnd); 
             // Retrieve the screen coordinates of the client area, 
             // and convert them into client coordinates. 
@@ -61,7 +59,7 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         case WM_LBUTTONUP:
         {
             input.mouseState = false;
-            // input.mousePressed = false;
+            input.mousePressed = false;
             ReleaseCapture(); 
             return;
         }
@@ -70,16 +68,16 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 bool State::isKeyPressed(int key) {
-    if (input.keyPressed[key]) {
-        input.keyPressed[key] = false;
+    if (!input.keyPressed[key] && input.keyState[key]) {
+        input.keyPressed[key] = true;
         return true;
     }
     return false;
 }
 
 bool State::isMousePressed() {
-    if (input.mousePressed) {
-        input.mousePressed = false;
+    if (!input.mousePressed && input.mouseState) {
+        input.mousePressed = true;
         return true;
     }
     return false;

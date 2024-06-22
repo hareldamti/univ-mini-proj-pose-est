@@ -43,15 +43,5 @@ struct Ray {
 };
 
 
-struct Intersection {
-    bool hit;
-    float distance;
-    Vec3 point;
-    int triangleIndex;
-};
 
-typedef struct Triangle {
-    Vec3 a;
-    Vec3 b;
-    Vec3 c;
-} Triangle;
+
