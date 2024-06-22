@@ -38,8 +38,8 @@ u32 linkShaderProgram(u32 shader_id1, u32 shader_id2) {
     return program;
 }
 
-Render::Render(State& state) : m_state(state) {
-}
+Render::Render(State& state) :
+    m_state(state), x(0), y(0), width(state.window.width), height(state.window.height){}
 
 void Render::createProgram(const std::string& vertexFile, const std::string& fragmentFile) {
     GLCall(glGenBuffers(1, &VBO)); 
@@ -59,17 +59,19 @@ void Render::createProgram(const std::string& vertexFile, const std::string& fra
     GLCall(glEnableVertexAttribArray(1));
 
     GLCall(glDeleteShader(vertexShader));
-    GLCall(glDeleteShader(fragmentShader)); 
+    GLCall(glDeleteShader(fragmentShader));
     setUniform("camera", glm::mat4(1.0f));
 }
 
 void Render::setIndices(const u32* indices, const u32 n) {
+    GLCall(glBindVertexArray(VAO));
     nVertices = (i32)n;
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * n, indices, GL_STATIC_DRAW));
 }
 
 void Render::setVertices(const f32* vertices, const i32 n) {
+    GLCall(glBindVertexArray(VAO));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO)); 
     GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(f32) * n * 5, vertices));
 }
@@ -80,6 +82,14 @@ void Render::setUniform(const std::string& name, const glm::mat4& value) {
     GLSet(location, glGetUniformLocation(shaderProgram, name.c_str()));
     GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
+
+void Render::setUniform(const std::string& name, const glm::vec4& value) {
+    GLCall(glUseProgram(shaderProgram));
+    u32 location;
+    GLSet(location, glGetUniformLocation(shaderProgram, name.c_str()));
+    GLCall(glUniform4fv(location, 1, glm::value_ptr(value)));
+}
+
 
 void Render::setUniform(const std::string& name, float value) {
     GLCall(glUseProgram(shaderProgram));
@@ -96,15 +106,22 @@ void Render::setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov) {
     cam = glm::translate(cam, pos);
     glm::mat4 proj = glm::perspective(
         fov,
-        (float) m_state.window.width / m_state.window.height,
+        (float) width / height,
         0.1f, 100.0f
         ) * cam;
     
     setUniform("camera", proj);
 }
 
+void Render::viewport(int x, int y, int width, int height){
+    this->x = x;
+    this->y = y;
+    this->width = width;
+    this->height = height;
+}
+
 void Render::render() {
-    GLCall(glViewport(0, 0, 800, 600));
+    GLCall(glViewport(x, y, width, height));
     GLCall(glUseProgram(shaderProgram));
     GLCall(glBindVertexArray(VAO));
     GLCall(glDrawElements(GL_TRIANGLES, nVertices, GL_UNSIGNED_INT, 0));
