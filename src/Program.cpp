@@ -28,14 +28,10 @@ unsigned int indices[] = {  // note that we start from 0!
 */
 
 // setting up terrain
-std::string file_name = "src/terrain/img_test4.png";
-Terrain terrain = Terrain(file_name.c_str(), 1);
-
-float* vertices = terrain.vertices;
-unsigned int* indices = terrain.indices;
+Terrain terrain = Terrain("a.png", 2,5, 4.f);
 
 glm::vec4 pos(0.0f);
-glm::vec3 rot(0.0f);
+glm::vec3 rot(0.f, glm::pi<float>(),0.f);
 glm::mat4 dir;
 float v = 0.05f, vr = 0.01f;
 
@@ -56,12 +52,11 @@ void Program::init() {
     */
 
     m_render.createProgram("shaders/default.vert", "shaders/default.frag");
-    m_render.setIndices(indices, terrain.indices_vec.size());
-    m_tinted.createProgram("shaders/default.vert", "shaders/tinted.frag");
-    m_tinted.setIndices(indices, 12);
-    pos.z = -.5;
+    m_render.setIndices(terrain.indices, terrain.indices_vec.size());
+    //m_tinted.createProgram("shaders/default.vert", "shaders/tinted.frag");
+    //m_tinted.setIndices(indices, 12);
+    pos.z = -10;
     //glEnable(GL_BLEND);
-    
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 }
 
@@ -70,9 +65,15 @@ void Program::update() {
     dir = glm::rotate(dir, rot.y, glm::vec3(1,0,0));
 
 
-    if (m_state.input.keyState['W']) {pos += v * dir * glm::vec4(0,0,1,0);}
-    if (m_state.input.keyState['S']) {pos -= v * dir * glm::vec4(0,0,1,0);}
+    if (m_state.input.keyState['S']) {pos += v * dir * glm::vec4(0,0,1,0);}
+    if (m_state.input.keyState['W']) {pos -= v * dir * glm::vec4(0,0,1,0);}
     
+    if (m_state.input.keyState['D']) {pos += v * dir * glm::vec4(1,0,0,0);}
+    if (m_state.input.keyState['A']) {pos -= v * dir * glm::vec4(1,0,0,0);}
+
+    if (m_state.input.keyState['E']) {pos += v * dir * glm::vec4(0,1,0,0);}
+    if (m_state.input.keyState['C']) {pos -= v * dir * glm::vec4(0,1,0,0);}
+
     if (m_state.input.keyState[VK_LEFT]) {rot.x += vr;}
     if (m_state.input.keyState[VK_RIGHT]) {rot.x -= vr;}
 
@@ -93,8 +94,8 @@ void Program::update() {
 }
 
 void Program::draw() {
-    m_render.setVertices(vertices, terrain.vertices_vec.size()/5);
-    m_render.viewport(0, 0, 800, 600);
+    m_render.setVertices(terrain.vertices, terrain.vertices_vec.size()/5);
+    m_render.viewport(0, 0, m_state.window.width, m_state.window.height);
     m_render.setCamera(pos, rot, 45.0f);
     m_render.render();
     

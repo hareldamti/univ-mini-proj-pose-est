@@ -1,6 +1,6 @@
 #include "Terrain.h"
 
-Terrain::Terrain(const char* filename, int downsize)
+Terrain::Terrain(const char* filename, int downsize, float xWidth, float height): xWidth(xWidth), height(height)
 {
     color_depth = 255;
     vertices_vec = {}; // maybe delete
@@ -13,26 +13,23 @@ Terrain::Terrain(const char* filename, int downsize)
     unsigned char* data;
     data = stbi_load(filename, &width_res, &height_res, &numComponents, 4);
 
-
      if (!data) {
         std::cerr << "Failed to load terrain image: " << filename << std::endl;
         return;
     }
 
-    Y_SIZE = (X_SIZE * width_res / height_res);
+    yWidth = (xWidth * width_res / height_res);
 
     // calculating vertices_vec vector
-    for (int x=0; x < width_res; x += downsize){ 
-        for (int y=0; y < height_res; y += downsize){
-
-
-            float x_pos = X_SIZE * x / width_res - (X_SIZE/2);
-            float y_pos = Y_SIZE * y / width_res- (Y_SIZE/2);
+    for (int y = 0; y < height_res; y += downsize){
+        for (int x = 0; x < width_res; x += downsize){ 
+            float x_pos = xWidth * x / width_res - (xWidth / 2);
+            float y_pos = yWidth * y / width_res - (yWidth / 2);
 
             int pixelIndex = (y * width_res + x) * 4; 
-            int averageRGB = (data[pixelIndex] + data[pixelIndex + 1] + data[pixelIndex + 2]) / 3.0; // average of RGB values
+            float averageRGB = (data[pixelIndex] + data[pixelIndex + 1] + data[pixelIndex + 2]) / 3.0; // average of RGB values
 
-            float z_pos = Z_SIZE * averageRGB / color_depth ;
+            float z_pos = height * averageRGB / color_depth;
 
             vertices_vec.push_back(x_pos);
             vertices_vec.push_back(y_pos);
@@ -44,9 +41,8 @@ Terrain::Terrain(const char* filename, int downsize)
     }
 
     // calculating triangles (indices) vector
-    for (int x = 0; x < (width_res / downsize - 1); x++){
-        for (int y = 0; y < (height_res / downsize - 1); y++) {
-
+    for (int y = 0; y < (height_res / downsize - 1); y++) {
+        for (int x = 0; x < (width_res / downsize - 1); x++){
             int topLeft = y * (width_res / downsize) + x;
             int topRight = topLeft + 1;
             int bottomLeft = topLeft + (width_res / downsize);

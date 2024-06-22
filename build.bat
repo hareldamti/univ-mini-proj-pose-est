@@ -1,1 +1,1 @@
-g++ -g -o pose-est.exe main.cpp src/glad.c src/stb_image.c src/*.cpp -Iinclude/ -lopengl32 -lglu32 -lgdi32
+g++ -g -o pose-est.exe main.cpp vendors/src/*.c src/*.cpp -Ivendors/include/ -Iinclude/ -lopengl32 -lglu32 -lgdi32

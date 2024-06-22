@@ -7,25 +7,20 @@
 #include <vector>
 #include "stb_image.h"
 #include "GraphicsUtils.h"
-
-#define Z_SIZE 1.0
-#define X_SIZE 5.0
-
+#include "utils.h"
 
 class Terrain {
     private:
-
-        float Y_SIZE;
         int color_depth;
-        //std::vector<Triangle> triangles;
+
         
     public:
-
-        Terrain(const char* filename, int downsize);
+        Terrain(const char* filename, int downsize, float xWidth, float height);
         ~Terrain();
-        
         float* vertices;
         unsigned* indices;
+        float xWidth, yWidth, height;
+        i32 texture;
         std::vector<float> vertices_vec;
         std::vector<unsigned int> indices_vec;
         std::vector<Triangle> triangles;
