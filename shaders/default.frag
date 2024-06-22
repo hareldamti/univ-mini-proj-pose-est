@@ -1,11 +1,8 @@
 #version 330 core
-in vec2 uv;
+in vec2 TexCoord;
 out vec4 FragColor;
+uniform sampler2D TexImage;
 void main()
 {
-    FragColor = vec4(
-        0.5 + 0.5 * sin(uv.x * 10),
-        0.5 + 0.5 * sin(uv.y * 10),
-        0.5 + 0.5 * sin((uv.x - uv.y) * 4),
-        1.0);
+    FragColor = texture(TexImage, TexCoord);
 }

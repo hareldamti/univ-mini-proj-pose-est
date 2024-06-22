@@ -20,9 +20,10 @@ class Render {
         void setUniform(const std::string& name, const glm::mat4& value);
         void setUniform(const std::string& name, float value);
         void setUniform(const std::string& name, const glm::vec4& value);
-        void setCamera(const glm::vec3& pos, const glm::vec3& rot, f32 fov);
+        void setCamera(const glm::vec3& pos, const glm::vec3& dir, f32 fov);
+        void setCamera(const glm::vec3& pos, const glm::mat4& rot, f32 fov);
         void viewport(int x, int y, int width, int height);
-        void render();
+        void render(GLenum mode = GL_TRIANGLES);
 };
 
 u32 compileShader(const std::string& glsl_code, u32 shader_type);

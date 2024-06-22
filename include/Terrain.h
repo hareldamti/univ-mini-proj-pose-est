@@ -10,19 +10,15 @@
 #include "utils.h"
 
 class Terrain {
-    private:
-        int color_depth;
-
-        
     public:
-        Terrain(const char* filename, int downsize, float xWidth, float height);
+        Terrain(float xWidth, float height);
         ~Terrain();
         float* vertices;
         unsigned* indices;
         float xWidth, yWidth, height;
-        i32 texture;
+        u32 texture;
         std::vector<float> vertices_vec;
         std::vector<unsigned int> indices_vec;
         std::vector<Triangle> triangles;
-
+        void loadTexture(const char* filename, int downsize);
 };

@@ -1,10 +1,11 @@
 #pragma once
 #include "Render.h"
-
+#include "Terrain.h"
 class Program {
     private:
         State& m_state;
-        Render m_render, m_tinted;
+        Render m_render;
+        Terrain m_terrain;
         // global variables
 
     public:
