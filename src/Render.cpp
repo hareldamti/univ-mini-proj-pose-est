@@ -82,6 +82,7 @@ void Render::setUniform(const std::string& name, const glm::mat4& value) {
     GLCall(glUseProgram(shaderProgram));
     u32 location;
     GLSet(location, glGetUniformLocation(shaderProgram, name.c_str()));
+    if (location < 0) ERROR_EXIT("Uniform location not found: %s\n", name);
     GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
 
@@ -89,6 +90,7 @@ void Render::setUniform(const std::string& name, const glm::vec4& value) {
     GLCall(glUseProgram(shaderProgram));
     u32 location;
     GLSet(location, glGetUniformLocation(shaderProgram, name.c_str()));
+    if (location < 0) ERROR_EXIT("Uniform location not found: %s\n", name);
     GLCall(glUniform4fv(location, 1, glm::value_ptr(value)));
 }
 
@@ -97,6 +99,7 @@ void Render::setUniform(const std::string& name, float value) {
     GLCall(glUseProgram(shaderProgram));
     u32 location;
     GLSet(location, glGetUniformLocation(shaderProgram, name.c_str()));
+    if (location < 0) ERROR_EXIT("Uniform location not found: %s\n", name);
     GLCall(glUniform1f(location, value));
 }
 
@@ -142,10 +145,30 @@ void Render::viewport(int x, int y, int width, int height){
     this->height = height;
 }
 
-void Render::render(GLenum mode) {
+void Render::render(GLenum mode, bool useElements) {
     GLCall(glViewport(x, y, width, height));
     GLCall(glUseProgram(shaderProgram));
     GLCall(glBindVertexArray(VAO));
-    GLCall(glDrawElements(mode, nVertices, GL_UNSIGNED_INT, 0));
+    if (useElements) {
+        GLCall(glDrawElements(mode, nVertices, GL_UNSIGNED_INT, 0));
+    } else {
+        glDrawArrays(mode, 0, nVertices);
+    }
     GLCall(glBindVertexArray(0));
+}
+
+void Render::renderPoints(std::vector<cv::Point3f> points) {
+    f32 data[5 * points.size()];
+    u32 idx[points.size()];
+    for (int i = 0; i < points.size(); i++) {
+        idx[i] = i;
+        data[5*i] = points[i].x;
+        data[5*i+1] = points[i].y;
+        data[5*i+2] = points[i].z;
+        data[5*i+3] = rand()*1.0/RAND_MAX;
+        data[5*i+4] = rand()*1.0/RAND_MAX;
+    }
+    setIndices(idx, points.size());
+    setVertices(data, points.size());
+    render(GL_POINTS, true);
 }

@@ -26,5 +26,5 @@ class Terrain {
         std::vector<float> vertices_vec;
         std::vector<unsigned int> indices_vec;
         std::vector<Triangle> triangles;
-        void loadTexture(const char* filename, int downsize);
+        void loadTexture(const char* heightFile, const char* textureFile, int downsize);
 };

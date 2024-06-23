@@ -262,7 +262,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 					int			nCmdShow)			// Window Show State
 {
     state.window.shouldQuit = !createGLWindow("Pose Estimation", state.window.width, state.window.height);
-	program.init();
+	program.wrapInit();
 	MSG	msg;
     while (!state.window.shouldQuit) {
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))

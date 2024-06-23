@@ -33,3 +33,10 @@ bool _glCatchError(const char* func_name, const char* file, int line) {
     if (!r) ERROR_EXIT("");
     return r;
 }
+
+cv::Point2f Point2f(glm::vec2& point) {
+    return cv::Point2f(point.x, point.y);
+}
+cv::Point3f Point3f(glm::vec3& point) {
+    return cv::Point3f(point.x, point.y, point.z);
+}

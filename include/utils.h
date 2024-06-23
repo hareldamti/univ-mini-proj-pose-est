@@ -14,8 +14,8 @@
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale
 #include <glm/gtc/type_ptr.hpp>
-
 #include <inttypes.h>
+#include "opencv2/calib3d/calib3d.hpp"
 
 typedef int8_t i8;
 typedef int16_t i16;
@@ -42,3 +42,6 @@ typedef double f64;
 void _glClearError();
 bool _glCatchError(const char* func_name, const char* file, int line);
 std::string readFile(const std::string& file_path);
+
+cv::Point2f Point2f(glm::vec2& point);
+cv::Point3f Point3f(glm::vec3& point);

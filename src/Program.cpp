@@ -1,83 +1,109 @@
 #include "Program.h"
-#include "Picking.h"
-
-
+#include "Pose.h"
 
 Program::Program(State& state) :
-    m_state(state),
-    m_terrain_renderer(state),
-    m_lines_renderer(state),
-    m_points_renderer(state),
-    m_terrain(10, 1){}
+    state(state),
+    terrainRenderer(state),
+    linesRenderer(state),
+    pointsRenderer(state),
+    terrain(10, 1){}
 
+void Program::wrapInit() {
+    // Terrain and terrain shader
+    terrain.loadTexture("IMG-0458.png", "IMG-0458.png", 100);
+    terrainRenderer.createProgram("shaders/default.vert", "shaders/texture.frag");
+    terrainRenderer.setIndices(terrain.indices, terrain.indices_vec.size());
+    terrainRenderer.setVertices(terrain.vertices, terrain.vertices_vec.size() / 5);
+    terrainRenderer.setTexture(terrain.texture);
 
-
-float v = 0.05f, vr = 0.01f;
-glm::vec3 point(0.f);
-
-void Program::init() {
-    m_terrain.loadTexture("IMG-0458.png", 100);
-    m_terrain_renderer.createProgram("shaders/default.vert", "shaders/texture.frag");
-    m_terrain_renderer.setIndices(m_terrain.indices, m_terrain.indices_vec.size());
-    m_terrain_renderer.setVertices(m_terrain.vertices, m_terrain.vertices_vec.size() / 5);
-    m_lines_renderer.createProgram("shaders/default.vert", "shaders/default.frag");
-    m_points_renderer.createProgram("shaders/default.vert", "shaders/default.frag");
-    
-    cameraPos = glm::vec4(0.0f);
-    cameraRot = glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0));
-    cameraPos.z = -10;
+    // Lines and points shader
+    linesRenderer.createProgram("shaders/default.vert", "shaders/rainbow.frag");
+    pointsRenderer.createProgram("shaders/default.vert", "shaders/rainbow.frag");
+    init();
 }
-
-
-void Program::update() {
-    if (m_state.input.keyState['S']) {cameraPos += v * cameraRot * glm::vec4(0,0,1,0);}
-    if (m_state.input.keyState['W']) {cameraPos -= v * cameraRot * glm::vec4(0,0,1,0);}
+void Program::moveByInput() {
+    if (state.input.keyState['S']) {obsvCamera.pos += obsvVel * obsvCamera.rot * glm::vec4(0,0,1,0);}
+    if (state.input.keyState['W']) {obsvCamera.pos -= obsvVel * obsvCamera.rot * glm::vec4(0,0,1,0);}
     
-    if (m_state.input.keyState['D']) {cameraPos += v * cameraRot * glm::vec4(1,0,0,0);}
-    if (m_state.input.keyState['A']) {cameraPos -= v * cameraRot * glm::vec4(1,0,0,0);}
+    if (state.input.keyState['D']) {obsvCamera.pos += obsvVel * obsvCamera.rot * glm::vec4(1,0,0,0);}
+    if (state.input.keyState['A']) {obsvCamera.pos -= obsvVel * obsvCamera.rot * glm::vec4(1,0,0,0);}
 
-    if (m_state.input.keyState['E']) {cameraPos += v * cameraRot * glm::vec4(0,1,0,0);}
-    if (m_state.input.keyState['C']) {cameraPos -= v * cameraRot * glm::vec4(0,1,0,0);}
+    if (state.input.keyState['E']) {obsvCamera.pos += obsvVel * obsvCamera.rot * glm::vec4(0,1,0,0);}
+    if (state.input.keyState['C']) {obsvCamera.pos -= obsvVel * obsvCamera.rot * glm::vec4(0,1,0,0);}
 
-    if (m_state.input.keyState[VK_LEFT]) { cameraRot = cameraRot * glm::rotate(glm::mat4(1.0f), vr, glm::vec3(0,1,0)); }
-    if (m_state.input.keyState[VK_RIGHT]) { cameraRot = cameraRot * glm::rotate(glm::mat4(1.0f), -vr, glm::vec3(0,1,0)); }
+    if (state.input.keyState[VK_LEFT]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), obsvAngVel, glm::vec3(0,1,0)); }
+    if (state.input.keyState[VK_RIGHT]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), -obsvAngVel, glm::vec3(0,1,0)); }
 
-    if (m_state.input.keyState[VK_UP]) { cameraRot = cameraRot * glm::rotate(glm::mat4(1.0f), vr, glm::vec3(1,0,0)); }
-    if (m_state.input.keyState[VK_DOWN]) { cameraRot = cameraRot * glm::rotate(glm::mat4(1.0f), -vr, glm::vec3(1,0,0)); }
+    if (state.input.keyState[VK_UP]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), obsvAngVel, glm::vec3(1,0,0)); }
+    if (state.input.keyState[VK_DOWN]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), -obsvAngVel, glm::vec3(1,0,0)); }
 
-    if (m_state.input.keyState[VK_OEM_COMMA]) { cameraRot = cameraRot * glm::rotate(glm::mat4(1.0f), vr, glm::vec3(0,0,1)); }
-    if (m_state.input.keyState[VK_OEM_PERIOD]) { cameraRot = cameraRot * glm::rotate(glm::mat4(1.0f), -vr, glm::vec3(0,0,1)); }
+    if (state.input.keyState[VK_OEM_COMMA]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), obsvAngVel, glm::vec3(0,0,1)); }
+    if (state.input.keyState[VK_OEM_PERIOD]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), -obsvAngVel, glm::vec3(0,0,1)); }
+}
+void Program::pickByInput() {
 
-    //picking
-    if (m_state.isMousePressed())
+    // pick point
+    if (state.isMousePressed())
     {   
-        Intersection intersection = Picking::cast(cameraPos, cameraRot, m_terrain_renderer, m_state, m_terrain);
+        cv::Point2f screen(
+            state.input.mouseX * 1.0 / state.window.width,
+            state.input.mouseY * 1.0 / state.window.height
+        );
+        
+        Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
         if (intersection.hit) {
-            point = intersection.point;
+            pickingClicks.push_back(screen);
+            pickingPoints.push_back(Point3f(intersection.point));
         }
-        Picking::printIntersection(intersection);
+        Pose::printIntersection(intersection);
     }
 }
 
-void Program::draw() {
-    m_terrain_renderer.viewport(0, 0, m_state.window.width, m_state.window.height);
-    m_terrain_renderer.setCamera(cameraPos, cameraRot);
-    m_terrain_renderer.setTexture(m_terrain.texture);
-    m_terrain_renderer.render(GL_TRIANGLES);
-
-    glBegin(GL_POINTS);
-    glVertex3fv(glm::value_ptr(point));
-    glEnd();
-    glPointSize(10);
+void Program::switchStateByInput() {
+    switch (programState) {
+        case traversing: {
+            if (state.isKeyPressed('P')) 
+                programState = picking;
+        }
+        case picking: {
+            if (state.isKeyPressed('P')) 
+                programState = traversing;
+        }
+    }
 }
 
 
+void Program::init() {
+    obsvCamera.pos = glm::vec4(0.0f);
+    obsvCamera.rot = glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0));
+    obsvCamera.pos.z = -10;
+    programState = traversing;
+}
+
+void Program::update() {
+    /// TODO: rotate hover camera
+
+    switchStateByInput();
+    if (programState == traversing) moveByInput();
+    if (programState == picking) pickByInput();
+}
+
+void Program::draw() {
+    terrainRenderer.viewport(0, 0, state.window.width, state.window.height);
+    terrainRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
+    terrainRenderer.render(GL_LINES);
+    
+    glPointSize(10);
+    pointsRenderer.viewport(0, 0, state.window.width, state.window.height);
+    pointsRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
+    pointsRenderer.renderPoints(pickingPoints);
+}
 // GLCall(glDisable(GL_DEPTH_TEST));
 // GLCall(glEnable(GL_BLEND));
 // GLCall(glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA));
 // m_tinted.setVertices(vertices, 8);
 // m_tinted.viewport(400, 0, 400, 600);
-// m_tinted.setCamera(cameraPos, rot, 45.0f);
+// m_tinted.setCamera(obsvCamera.pos, rot, 45.0f);
 // m_tinted.setUniform("tintColor", glm::vec4(0.f,0.f,1.f,1.f));
 // m_tinted.render();
 // m_tinted.setUniform("tintColor", glm::vec4(1.f,0.f,0.f,1.f));

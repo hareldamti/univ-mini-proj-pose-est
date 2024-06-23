@@ -2,7 +2,7 @@
 
 Terrain::Terrain(float xWidth, float height): xWidth(xWidth), height(height) {}
 
-void Terrain::loadTexture(const char* filename, int downsize) {
+void Terrain::loadTexture(const char* heightFile, const char* textureFile, int downsize) {
     const int color_depth = 255;
     vertices_vec = {};
     indices_vec = {};
@@ -12,11 +12,10 @@ void Terrain::loadTexture(const char* filename, int downsize) {
     int numComponents;
 
     unsigned char* data;
-    data = stbi_load(filename, &imgWidth, &imgHeight, &numComponents, 4);
-
-     if (!data) {
+    data = stbi_load(heightFile, &imgWidth, &imgHeight, &numComponents, 4);
+    if (!data) {
         stbi_image_free(data);
-        ERROR_EXIT("Failed to load terrain image: %s\n",filename);
+        ERROR_EXIT("Failed to load terrain height image: %s\n",heightFile);
         return;
     }
 
@@ -59,9 +58,7 @@ void Terrain::loadTexture(const char* filename, int downsize) {
             indices_vec.push_back(topLeft);
         }
     }
-
     //converting vector array 
-
     vertices = new float[vertices_vec.size()];
     std::copy(vertices_vec.begin(), vertices_vec.end(), vertices);
 
@@ -75,7 +72,14 @@ void Terrain::loadTexture(const char* filename, int downsize) {
         glm::vec3 c = {vertices[indices[i+2]*5], vertices[indices[i+2]*5 + 1],vertices[indices[i+2]*5 + 2]};
         triangles.push_back({a,b,c});
     }
+    stbi_image_free(data);
 
+    data = stbi_load(textureFile, &imgWidth, &imgHeight, &numComponents, 4);
+    if (!data) {
+        stbi_image_free(data);
+        ERROR_EXIT("Failed to load terrain texture image: %s\n",heightFile);
+        return;
+    }
     // Copy image texture
     GLCall(glGenTextures(1, &texture));
     GLCall(glBindTexture(GL_TEXTURE_2D, texture));
@@ -95,17 +99,4 @@ Terrain::~Terrain(){
     delete[] vertices;
     delete[] indices;
 }
-
-
-
-// extract triangle by index
-// Triangle Terrain::getTriangle(int i) {
-//     Vec3 a = vertices_vec[indices_vec[i*3]];
-//     Vec3 b = vertices_vec[indices_vec[i*3+1]];
-//     Vec3 c = vertices_vec[indices_vec[i*3+2]];
-//     Triangle res = {a, b, c};
-//     return res;
-// }
-
-
 
