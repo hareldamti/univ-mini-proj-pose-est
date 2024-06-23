@@ -25,6 +25,8 @@ typedef struct InputState {
 
 
 class State {
+    private:
+        int startTime;
     public:
         State(int width, int height, bool fullscreen = false);
         WindowState window;
@@ -32,5 +34,7 @@ class State {
         void handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
         bool isKeyPressed(int key);
         bool isMousePressed();
+        void init();
+        int getMillis();
 };
 

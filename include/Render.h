@@ -17,11 +17,11 @@ class Render {
         u32 EBO;
         i32 nVertices;
         u32 shaderProgram;
-        i32 x, y;
+        
         
     public:
         Render(State& state);
-        i32 width, height;
+        i32 x, y, width, height;
         void createProgram(const std::string& vertexFile, const std::string& fragmentFile);
         void setIndices(const u32* indices, const u32 n);
         void setVertices(const f32* vertices, const i32 n);

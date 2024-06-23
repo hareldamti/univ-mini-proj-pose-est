@@ -19,6 +19,9 @@ void Program::wrapInit() {
     // Lines and points shader
     linesRenderer.createProgram("shaders/default.vert", "shaders/rainbow.frag");
     pointsRenderer.createProgram("shaders/default.vert", "shaders/rainbow.frag");
+
+    glPointSize(10);
+
     init();
 }
 void Program::moveByInput() {
@@ -46,8 +49,8 @@ void Program::pickByInput() {
     if (state.isMousePressed())
     {   
         cv::Point2f screen(
-            state.input.mouseX * 1.0 / state.window.width,
-            state.input.mouseY * 1.0 / state.window.height
+            (state.input.mouseX - terrainRenderer.x) * 1.0 / terrainRenderer.width,
+            (state.input.mouseY - terrainRenderer.y) * 1.0 / terrainRenderer.height
         );
         
         Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
@@ -75,26 +78,38 @@ void Program::switchStateByInput() {
 
 void Program::init() {
     obsvCamera.pos = glm::vec4(0.0f);
-    obsvCamera.rot = glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0));
-    obsvCamera.pos.z = -10;
+    obsvCamera.rot = glm::rotate(glm::mat4(1.0), 0.f, glm::vec3(0,1,0));
+    obsvCamera.pos.z = 10;
     programState = traversing;
 }
 
 void Program::update() {
     /// TODO: rotate hover camera
+    glm::mat4 rotateHover = glm::rotate(glm::mat4(1.0), state.getMillis() / 2000.f, glm::vec3(0,0,1));
+    hoverCamera.pos = rotateHover * glm::vec4(0,-10,10,1);
+    hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), glm::pi<float>() / 4.f, glm::vec3(1,0,0));
 
+    if (state.isKeyPressed('C')) {LOG_DEBUG("%d",state.getMillis());}
     switchStateByInput();
     if (programState == traversing) moveByInput();
     if (programState == picking) pickByInput();
 }
 
 void Program::draw() {
-    terrainRenderer.viewport(0, 0, state.window.width, state.window.height);
-    terrainRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
+    terrainRenderer.viewport(0, 0, state.window.width/2., state.window.height);
+    terrainRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     terrainRenderer.render(GL_LINES);
+
+    pointsRenderer.viewport(0, 0, state.window.width/2., state.window.height);
+    pointsRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
+    pointsRenderer.renderPoints(pickingPoints);
+
+    // Picking view rendered last
+    terrainRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
+    terrainRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
+    terrainRenderer.render();
     
-    glPointSize(10);
-    pointsRenderer.viewport(0, 0, state.window.width, state.window.height);
+    pointsRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
     pointsRenderer.renderPoints(pickingPoints);
 }

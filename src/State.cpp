@@ -63,7 +63,6 @@ void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
             ReleaseCapture(); 
             return;
         }
-
     }
 }
 
@@ -81,4 +80,22 @@ bool State::isMousePressed() {
         return true;
     }
     return false;
+}
+
+int getMilliCount(){
+	timeb tb;
+	ftime(&tb);
+	int nCount = tb.millitm + (tb.time & 0xfffff) * 1000;
+	return nCount;
+}
+
+void State::init() {
+    startTime = getMilliCount();
+}
+
+int State::getMillis() {
+	int nSpan = getMilliCount() - startTime;
+	if(nSpan < 0)
+		nSpan += 0x100000 * 1000;
+	return nSpan;
 }

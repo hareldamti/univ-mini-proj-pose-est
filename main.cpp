@@ -3,7 +3,7 @@
 #include "State.h"
 #include "Program.h"
 
-State state(1200, 800, false);
+State state(1600, 800, false);
 Program program(state);
 
 int initGL(GLvoid)										// All Setup For OpenGL Goes Here
@@ -263,6 +263,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 {
     state.window.shouldQuit = !createGLWindow("Pose Estimation", state.window.width, state.window.height);
 	program.wrapInit();
+	state.init();
 	MSG	msg;
     while (!state.window.shouldQuit) {
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
