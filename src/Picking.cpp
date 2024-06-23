@@ -1,15 +1,20 @@
 #include "Picking.h"
 
-
 Intersection computeIntersection(glm::vec4 src, glm::vec4 dir, Triangle triangle, int index){
     glm::vec3 u = triangle.b - triangle.a,
               v = triangle.c - triangle.a,
               r = glm::vec3(dir);
     
-    glm::mat3 intersectionMatrix = glm::transpose(glm::mat3(u, v, dir));
-    if (glm::abs(glm::determinant(intersectionMatrix)) < 10e-4f) return {false, -1, {}};
-    glm::vec3 components = glm::inverse(intersectionMatrix) * (glm::vec3(src) - triangle.a);
-    LOG_DEBUG("components (%f %f %f)", components.x, components.y, components.z);
+    glm::mat3 intersectionMatrix = glm::mat3(u, v, dir);
+    float d = glm::determinant(intersectionMatrix);
+    if (glm::abs(d) < 10e-4f) return {false, -1, {}};
+    glm::vec3 components;
+    for (int i = 0; i < 3; i++) {
+        glm::mat3 m(intersectionMatrix);
+        m[i] = glm::vec3(src) - triangle.a;
+        components[i] = glm::determinant(m) / d;
+    }
+
     if (components.x < 0 || components.y < 0 || components.x + components.y > 1 || components.z < 0) return {false, -1, {}};
     return {true, components.z, triangle.a + components.x * u + components.y * v};
 }
@@ -20,14 +25,15 @@ Intersection Picking::cast(glm::vec4& cameraPos, glm::mat4& cameraRot, Render& t
     float   u = state.input.mouseX * 1.0 / state.window.width,
             v = state.input.mouseY * 1.0 / state.window.height,
             ratio = state.window.width * 1.0 / state.window.height,
-            fov = glm::tan(CAMERA_FOV * glm::pi<float>() / 360);
+            fov = glm::tan(CAMERA_FOV * glm::pi<float>() / 277);
     glm::vec4 ray = glm::normalize(glm::vec4(
-        (2*u - 1) * fov * ratio,
+        (1 - 2*u) * fov * ratio,
         (2*v - 1) * fov,
         1,
         1
     ));
     ray = cameraRot * ray;
+    
     Intersection closestIntersection = {false, -1, {}};
     int index = 0;
     for (auto& triangle : terrain.triangles) {

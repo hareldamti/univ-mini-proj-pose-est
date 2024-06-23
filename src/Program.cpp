@@ -8,16 +8,15 @@ Program::Program(State& state) :
     m_terrain_renderer(state),
     m_lines_renderer(state),
     m_points_renderer(state),
-    m_terrain(10, 0){}
+    m_terrain(10, 1){}
 
 
 
 float v = 0.05f, vr = 0.01f;
-std::vector<f32> pickingPoints;
-std::vector<u32> pickingIndices;
+glm::vec3 point(0.f);
 
 void Program::init() {
-    m_terrain.loadTexture("IMG-0458.png", 500);
+    m_terrain.loadTexture("IMG-0458.png", 100);
     m_terrain_renderer.createProgram("shaders/default.vert", "shaders/texture.frag");
     m_terrain_renderer.setIndices(m_terrain.indices, m_terrain.indices_vec.size());
     m_terrain_renderer.setVertices(m_terrain.vertices, m_terrain.vertices_vec.size() / 5);
@@ -54,12 +53,7 @@ void Program::update() {
     {   
         Intersection intersection = Picking::cast(cameraPos, cameraRot, m_terrain_renderer, m_state, m_terrain);
         if (intersection.hit) {
-            pickingPoints.push_back(intersection.point.x);
-            pickingPoints.push_back(intersection.point.y);
-            pickingPoints.push_back(intersection.point.z);
-            pickingPoints.push_back(rand()/RAND_MAX);
-            pickingPoints.push_back(rand()/RAND_MAX);
-            pickingIndices.push_back(pickingPoints.size());
+            point = intersection.point;
         }
         Picking::printIntersection(intersection);
     }
@@ -69,15 +63,12 @@ void Program::draw() {
     m_terrain_renderer.viewport(0, 0, m_state.window.width, m_state.window.height);
     m_terrain_renderer.setCamera(cameraPos, cameraRot);
     m_terrain_renderer.setTexture(m_terrain.texture);
-    m_terrain_renderer.render(GL_LINES);
+    m_terrain_renderer.render(GL_TRIANGLES);
 
-    m_points_renderer.setIndices(pickingIndices.data(), pickingIndices.size());
-    m_points_renderer.setVertices(pickingPoints.data(), pickingPoints.size());
-    m_points_renderer.viewport(0, 0, m_state.window.width, m_state.window.height);
-    m_points_renderer.setCamera(cameraPos, cameraRot);
-    m_points_renderer.setTexture(m_terrain.texture);
+    glBegin(GL_POINTS);
+    glVertex3fv(glm::value_ptr(point));
+    glEnd();
     glPointSize(10);
-    m_points_renderer.render(GL_POINTS);
 }
 
 

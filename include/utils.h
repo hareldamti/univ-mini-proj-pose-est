@@ -42,5 +42,3 @@ typedef double f64;
 void _glClearError();
 bool _glCatchError(const char* func_name, const char* file, int line);
 std::string readFile(const std::string& file_path);
-
-
