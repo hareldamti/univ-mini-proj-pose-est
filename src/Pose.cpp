@@ -46,6 +46,22 @@ Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render
     return closestIntersection;
 }
 
+
+
+Camera Pose::solvePnP(std::vector<cv::Point3f> points, std::vector<cv::Point2f> screen, Render& terrainRenderer) {
+    float fov = glm::tan(CAMERA_FOV * glm::pi<float>() / 277);
+    cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
+        1.0/fov,    0,          0,   // fx, skew, cx
+        0,          1.0/fov,    0,   // 0, fy, cy
+        0,          0,          1         // 0, 0, 1
+    );
+    cv::Mat distCoeffs = cv::Mat::zeros(4, 1, CV_32F);
+    cv::Mat rvec;
+    cv::Mat tvec;
+    cv::solvePnP(points, screen, cameraMatrix, distCoeffs, rvec, tvec);
+    return {Mat4(tvec) * glm::vec4(0.f), Mat4(rvec)};
+}
+
 void Pose::printIntersection(const Intersection& intersection) {
     if (intersection.hit) {
         std::cout << "Intersection found:\n";
@@ -59,3 +75,4 @@ void Pose::printIntersection(const Intersection& intersection) {
         std::cout << "No intersection found.\n";
     }
 }
+

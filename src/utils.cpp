@@ -40,3 +40,11 @@ cv::Point2f Point2f(glm::vec2& point) {
 cv::Point3f Point3f(glm::vec3& point) {
     return cv::Point3f(point.x, point.y, point.z);
 }
+
+glm::mat4 Mat4(cv::Mat& mat) {
+    glm::mat4 m;
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            m[j][i] = mat.at<float>(i, j);
+    return m;
+}

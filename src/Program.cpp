@@ -45,7 +45,6 @@ void Program::moveByInput() {
 }
 void Program::pickByInput() {
 
-    // pick point
     if (state.isMousePressed())
     {   
         cv::Point2f screen(
@@ -59,6 +58,13 @@ void Program::pickByInput() {
             pickingPoints.push_back(Point3f(intersection.point));
         }
         Pose::printIntersection(intersection);
+    }
+
+    if (state.isKeyPressed('C')) {
+        Camera computed = Pose::solvePnP(pickingPoints, pickingClicks, terrainRenderer);
+        obsvCamera = computed;
+        pickingPoints.clear();
+        pickingClicks.clear();
     }
 }
 
@@ -74,7 +80,6 @@ void Program::switchStateByInput() {
         }
     }
 }
-
 
 void Program::init() {
     obsvCamera.pos = glm::vec4(0.0f);
