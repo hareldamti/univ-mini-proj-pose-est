@@ -42,9 +42,27 @@ cv::Point3f Point3f(glm::vec3& point) {
 }
 
 glm::mat4 Mat4(cv::Mat& mat) {
-    glm::mat4 m;
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            m[j][i] = mat.at<float>(i, j);
+    glm::mat4 m(1.0f);
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            m[j][i] = mat.at<double>(i, j);
     return m;
+}
+
+glm::vec4 Vec4(cv::Mat tvec) {
+    return glm::vec4(tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2), 1);
+}
+std::string format(glm::mat4 m) {
+    return std::format( 
+        "{}\t{}\t{}\t{}\n{}\t{}\t{}\t{}\n{}\t{}\t{}\t{}\n{}\t{}\t{}\t{}",
+        m[0][0], m[1][0], m[2][0], m[3][0],
+        m[0][1], m[1][1], m[2][1], m[3][1],
+        m[0][2], m[1][2], m[2][2], m[3][2],
+        m[0][3], m[1][3], m[2][3], m[3][3]); 
+}
+
+std::string format(glm::vec4 v) {
+    return std::format( 
+        "{}\n{}\n{}\n{}",
+        v[0], v[1], v[2], v[3]); 
 }

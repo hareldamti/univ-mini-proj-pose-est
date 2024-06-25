@@ -6,12 +6,15 @@
 #include <string>
 #include <math.h>
 #include <map>
+#include <format>
+#include <iostream>
 #include "glad/glad.h"
 #include <gl\gl.h>	
 #include <gl\glu.h>	
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+
 #include <glm/ext/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale
 #include <glm/gtc/type_ptr.hpp>
 #include <inttypes.h>
@@ -47,3 +50,7 @@ std::string readFile(const std::string& file_path);
 cv::Point2f Point2f(glm::vec2& point);
 cv::Point3f Point3f(glm::vec3& point);
 glm::mat4 Mat4(cv::Mat& mat);
+glm::vec4 Vec4(cv::Mat tvec);
+
+std::string format(glm::mat4 m);
+std::string format(glm::vec4 m);

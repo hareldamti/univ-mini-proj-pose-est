@@ -17,7 +17,8 @@ class Program {
         void moveByInput();
         void pickByInput();
         void switchStateByInput();
-
+        
+        void addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeValues, std::vector<float> keyframeTimes);
         // state variables
         std::vector<cv::Point2f> pickingClicks;
         std::vector<cv::Point3f> pickingPoints;

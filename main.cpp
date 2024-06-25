@@ -3,7 +3,7 @@
 #include "State.h"
 #include "Program.h"
 
-State state(1600, 800, false);
+State state(1000, 600, false);
 Program program(state);
 
 int initGL(GLvoid)										// All Setup For OpenGL Goes Here
@@ -278,6 +278,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
+		state.update();
 		program.update();
 		program.draw();
 		Sleep(10);

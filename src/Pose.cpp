@@ -5,7 +5,7 @@ Intersection computeIntersection(glm::vec4 src, glm::vec4 dir, Triangle triangle
               v = triangle.c - triangle.a,
               r = glm::vec3(dir);
     
-    glm::mat3 intersectionMatrix = glm::mat3(u, v, dir);
+    glm::mat3 intersectionMatrix = glm::mat3(u, v, -dir);
     float d = glm::determinant(intersectionMatrix);
     if (glm::abs(d) < 10e-4f) return {false, -1, {}};
     glm::vec3 components;
@@ -46,8 +46,6 @@ Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render
     return closestIntersection;
 }
 
-
-
 Camera Pose::solvePnP(std::vector<cv::Point3f> points, std::vector<cv::Point2f> screen, Render& terrainRenderer) {
     float fov = glm::tan(CAMERA_FOV * glm::pi<float>() / 277);
     cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
@@ -55,11 +53,17 @@ Camera Pose::solvePnP(std::vector<cv::Point3f> points, std::vector<cv::Point2f> 
         0,          1.0/fov,    0,   // 0, fy, cy
         0,          0,          1         // 0, 0, 1
     );
-    cv::Mat distCoeffs = cv::Mat::zeros(4, 1, CV_32F);
+    cv::Mat distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
     cv::Mat rvec;
     cv::Mat tvec;
-    cv::solvePnP(points, screen, cameraMatrix, distCoeffs, rvec, tvec);
-    return {Mat4(tvec) * glm::vec4(0.f), Mat4(rvec)};
+    if (!cv::solvePnP(points, screen, cameraMatrix, distCoeffs, rvec, tvec)) {
+        LOG_DEBUG("solvePnP failed");
+        return {glm::vec4(0),glm::mat4(-1)};
+    };
+    cv::Mat rot;
+    cv::Rodrigues(rvec, rot);
+
+    return {Vec4(tvec), Mat4(rot)};
 }
 
 void Pose::printIntersection(const Intersection& intersection) {
