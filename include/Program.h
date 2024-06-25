@@ -10,7 +10,7 @@ class Program {
         Render terrainRenderer, linesRenderer, pointsRenderer;
         Terrain terrain;
         Camera obsvCamera, hoverCamera;
-        float obsvVel = 0.05f, obsvAngVel = 0.01f;
+        float obsvVel = 0.1f, obsvAngVel = 0.015f;
         ProgramState programState;
 
         void init();

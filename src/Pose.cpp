@@ -23,15 +23,15 @@ Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render
 {
     /// TODO: Change ratio based on renderer's ratio
     float   ratio = terrainRenderer.width * 1.0 / terrainRenderer.height,
-            fov = glm::tan(CAMERA_FOV * glm::pi<float>() / 277);
+            fov = -glm::tan(CAMERA_FOV * glm::pi<float>() / 277);
     glm::vec4 ray = glm::normalize(glm::vec4(
-        (1 - 2*screen.x) * fov * ratio,
+        (2*screen.x - 1) * fov * ratio,
         (2*screen.y - 1) * fov,
         1,
         1
     ));
     ray = cam.rot * ray;
-    
+
     Intersection closestIntersection = {false, -1, {}};
     int index = 0;
     for (auto& triangle : terrain.triangles) {
@@ -47,15 +47,16 @@ Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render
 }
 
 Camera Pose::solvePnP(std::vector<cv::Point3f> points, std::vector<cv::Point2f> screen, Render& terrainRenderer) {
-    float fov = glm::tan(CAMERA_FOV * glm::pi<float>() / 277);
+    float fov = -glm::tan(CAMERA_FOV * glm::pi<float>() / 260);
     cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
         1.0/fov,    0,          0,   // fx, skew, cx
         0,          1.0/fov,    0,   // 0, fy, cy
-        0,          0,          1         // 0, 0, 1
+        0,          0,          1    // 0, 0, 1
     );
     cv::Mat distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
     cv::Mat rvec;
     cv::Mat tvec;
+    LOG_DEBUG("solvePnP %d %d", points.size(), screen.size());
     if (!cv::solvePnP(points, screen, cameraMatrix, distCoeffs, rvec, tvec)) {
         LOG_DEBUG("solvePnP failed");
         return {glm::vec4(0),glm::mat4(-1)};

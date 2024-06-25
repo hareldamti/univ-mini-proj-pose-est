@@ -3,7 +3,7 @@
 #include "State.h"
 #include "Program.h"
 
-State state(1000, 600, false);
+State state(1600, 800, false);
 Program program(state);
 
 int initGL(GLvoid)										// All Setup For OpenGL Goes Here

@@ -77,7 +77,7 @@ void Program::pickByInput() {
     {   
         cv::Point2f screen(
             (state.input.mouseX - terrainRenderer.x) * 1.0 / terrainRenderer.width,
-            (state.input.mouseY - terrainRenderer.y) * 1.0 / terrainRenderer.height
+            1 - (state.input.mouseY - terrainRenderer.y) * 1.0 / terrainRenderer.height
         );
         
         Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
@@ -104,6 +104,9 @@ void Program::switchStateByInput() {
         case traversing: {
             if (state.isKeyPressed('P')) 
                 programState = picking;
+                pickingPoints.clear();
+                pickingClicks.clear();
+                t = 0;
         }
         case picking: {
             if (state.isKeyPressed('P')) 
