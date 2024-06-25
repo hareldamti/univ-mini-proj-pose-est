@@ -6,7 +6,7 @@ Program::Program(State& state) :
     terrainRenderer(state),
     linesRenderer(state),
     pointsRenderer(state),
-    terrain(10, 1){}
+    terrain(20, 1){}
 
 void Program::addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeValues, std::vector<float> keyframeTimes) {
     std::vector<glm::vec4> pos;
@@ -19,25 +19,27 @@ void Program::addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeV
     state.createAnimation(&camera->rot, rot, keyframeTimes);
 }
 
-f32 lines[45] = {
+f32 lines[25] = {
     0, 0, 0, 0, 0
     -1000, 0, 0, 1, 0,
     1000, 0, 0, 1, 1,
     0, -1000, 0, 0, -1,
     0, 1000, 0, 1, 1, 
-    0, 0, -1000, 0, 1,
-    0, 0, 1000, 1, 1,
-    0,0,0,0,0,
-    0,0,0,0,0
 };
-u32 indices[4] = {
-    0,1,2,0
+u32 indices[30] = {
+    0, 1, 2,
+    0, 1, 3,
+    0, 2, 4,
+    0, 3, 4,
+    1, 0, 2,
+    1, 0, 3,
+    0, 4, 2,
+    4, 3, 0,
 };
-int t = 0;
 
 void Program::wrapInit() {
     // Terrain and terrain shader
-    terrain.loadTexture("IMG-0458.png", "IMG-0458.png", 100);
+    terrain.loadTexture("shrek.png", "shrek.png", 6);
     terrainRenderer.createProgram("shaders/default.vert", "shaders/texture.frag");
     terrainRenderer.setIndices(terrain.indices, terrain.indices_vec.size());
     terrainRenderer.setVertices(terrain.vertices, terrain.vertices_vec.size() / 5);
@@ -46,8 +48,6 @@ void Program::wrapInit() {
     // Lines and points shader
     linesRenderer.createProgram("shaders/default.vert", "shaders/color.frag");    
     pointsRenderer.createProgram("shaders/default.vert", "shaders/rainbow.frag");
-
-    glPointSize(10);
 
     init();
 }
@@ -94,7 +94,6 @@ void Program::pickByInput() {
             addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, 2.f}));
             pickingPoints.clear();
             pickingClicks.clear();
-            t = 20000;
         }
     }
 }
@@ -106,7 +105,6 @@ void Program::switchStateByInput() {
                 programState = picking;
                 pickingPoints.clear();
                 pickingClicks.clear();
-                t = 0;
         }
         case picking: {
             if (state.isKeyPressed('P')) 
@@ -124,11 +122,9 @@ void Program::init() {
 }
 
 void Program::update() { 
-    if (t > 0 && t%10 == 0) {auto g = glm::vec3(obsvCamera.pos);pickingPoints.push_back(Point3f(g));}
-    t--;
     glm::mat4 rotateHover = glm::rotate(glm::mat4(1.0), state.getMillis() / 2000.f, glm::vec3(0,0,1));
-    hoverCamera.pos = rotateHover * glm::vec4(0,0,20,1);
-    hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), 3.14f, glm::vec3(1,0,0));
+    hoverCamera.pos = rotateHover * glm::vec4(0,-20,20,1);
+    hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), 3.14f * 1.25f, glm::vec3(1,0,0));
     
     switchStateByInput();
     if (programState == traversing) moveByInput();
@@ -137,30 +133,39 @@ void Program::update() {
     lines[0] = obsvCamera.pos.x;
     lines[1] = obsvCamera.pos.y;
     lines[2] = obsvCamera.pos.z;
-    lines[5] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(0,-1,5,0)).x;
-    lines[6] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(0,-1,5,0)).y;
-    lines[7] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(0,-1,5,0)).z;
-    lines[10] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(0,1,5,0)).x;
-    lines[11] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(0,1,5,0)).y;
-    lines[12] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(0,1,5,0)).z;
-    linesRenderer.setVertices(lines, 3);
-    linesRenderer.setIndices(indices, 4);
+    lines[5] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,-1,3,0)).x;
+    lines[6] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,-1,3,0)).y;
+    lines[7] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,-1,3,0)).z;
+    lines[10] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,1,3,0)).x;
+    lines[11] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,1,3,0)).y;
+    lines[12] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,1,3,0)).z;
+    lines[15] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,-1,3,0)).x;
+    lines[16] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,-1,3,0)).y;
+    lines[17] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,-1,3,0)).z;
+    lines[20] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,1,3,0)).x;
+    lines[21] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,1,3,0)).y;
+    lines[22] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,1,3,0)).z;
+    linesRenderer.setVertices(lines, 5);
+    linesRenderer.setIndices(indices, 30);
 }
 
 void Program::draw() {
+    glPointSize(5);
+    glLineWidth(1);
     terrainRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     terrainRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     terrainRenderer.render(GL_LINES);
-
+    
     pointsRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     pointsRenderer.renderPoints(pickingPoints);
-
+    glLineWidth(3);
     linesRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     linesRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     linesRenderer.render(GL_LINES);
 
     // Picking view rendered last
+    glPointSize(15);
     terrainRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     terrainRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
     terrainRenderer.render();
@@ -168,10 +173,6 @@ void Program::draw() {
     pointsRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
     pointsRenderer.renderPoints(pickingPoints);
-
-    linesRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
-    linesRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
-    linesRenderer.render(GL_LINES);
 }
 
 

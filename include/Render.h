@@ -2,7 +2,8 @@
 #include "State.h"
 
 #define VERTEX_BUFFER_SIZE 1e5
-#define CAMERA_FOV 45.0f
+
+#define CAMERA_FOV PI / 3
 
 typedef struct Camera {
     glm::vec4 pos;
