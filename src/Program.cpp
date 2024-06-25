@@ -76,8 +76,8 @@ void Program::pickByInput() {
     if (state.isMousePressed())
     {   
         cv::Point2f screen(
-            (state.input.mouseX - terrainRenderer.x) * 1.0 / terrainRenderer.width,
-            1 - (state.input.mouseY - terrainRenderer.y) * 1.0 / terrainRenderer.height
+            ((state.input.mouseX - terrainRenderer.x) * 1.0 / terrainRenderer.width) * 2 - 1,
+            (1 - (state.input.mouseY - terrainRenderer.y) * 1.0 / terrainRenderer.height) * 2 - 1
         );
         
         Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
@@ -89,6 +89,7 @@ void Program::pickByInput() {
 
     if (state.isKeyPressed('C')) {
         if (pickingClicks.size() >= 6) {
+            for (auto p : pickingClicks) LOG_DEBUG("(%f %f)", p.x, p.y);
             Camera computed = Pose::solvePnP(pickingPoints, pickingClicks, terrainRenderer);
             LOG_DEBUG("\nrot:\n%s\npos:\n%s\n\nrot:\n%s\npos:\n%s", format(obsvCamera.rot).c_str(), format(obsvCamera.pos).c_str(),format(computed.rot).c_str(), format(computed.pos).c_str());
             addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, 2.f}));
@@ -114,6 +115,38 @@ void Program::switchStateByInput() {
 }
 
 void Program::init() {
+    // START DEBUG
+    cv::Mat tvec, rvec;
+    cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
+        2.0,    0,          0,   // fx, skew, cx
+        0,          2.0,    0,   // 0, fy, cy
+        0,          0,          1    // 0, 0, 1
+    );
+    cv::Mat distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
+    cv::solvePnP(std::vector<cv::Point3f>({
+        cv::Point3f(1,1,0),
+        cv::Point3f(1,0,0),
+        cv::Point3f(1,-1,0),
+        cv::Point3f(-1,1,0),
+        cv::Point3f(-1,0,0),
+        cv::Point3f(-1,-1,0),
+    }),std::vector<cv::Point2f>({
+        cv::Point2f(0.5,0.6),
+        cv::Point2f(0.5,0),
+        cv::Point2f(0.5,-0.6),
+        cv::Point2f(-0.5,0.5),
+        cv::Point2f(-0.5,0),
+        cv::Point2f(-0.5,-0.5)
+    }),
+    cameraMatrix,distCoeffs,rvec,tvec
+    );
+    LOG_DEBUG("rvec:\n")
+    cv::print(rvec);
+    LOG_DEBUG("tvec:\n")
+    cv::print(tvec);
+    //exit(0);
+    // END DEBUG
+
     obsvCamera.pos = glm::vec4(0.0f);
     obsvCamera.rot = glm::rotate(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0)), glm::pi<float>(), glm::vec3(0,0,1));
 
@@ -127,7 +160,10 @@ void Program::update() {
     hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), 3.14f * 1.25f, glm::vec3(1,0,0));
     
     switchStateByInput();
-    if (programState == traversing) moveByInput();
+    if (programState == traversing) {
+        moveByInput();
+        //deformByInput();
+    }
     if (programState == picking) pickByInput();
 
     lines[0] = obsvCamera.pos.x;

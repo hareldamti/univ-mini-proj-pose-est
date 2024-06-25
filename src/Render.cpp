@@ -138,7 +138,6 @@ void Render::setCamera(const glm::vec3& pos, const glm::mat4& rot) {
     setUniform("camera", proj);
 }
 
-
 void Render::viewport(int x, int y, int width, int height){
     this->x = x;
     this->y = y;
