@@ -19,7 +19,6 @@ class Render {
         i32 nVertices;
         u32 shaderProgram;
         
-        
     public:
         Render(State& state);
         i32 x, y, width, height;

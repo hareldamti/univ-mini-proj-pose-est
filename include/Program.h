@@ -20,12 +20,14 @@ class Program {
         void placeTrackersByInput();
         void captureByInput();
         void toggleLocationByInput();
-        
+
         void addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeValues, std::vector<float> keyframeTimes);
-        // state variables
-        std::vector<cv::Point2f> pickingClicks;
-        std::vector<cv::Point3f> pickingPoints;
         
+        // state variables
+        std::vector<cv::Point3f> trackerPoints;
+        std::vector<Camera> actualRoute;
+        std::vector<Camera> computedRoute;
+        int routeIdx;
 
     public:
         Program(State& state);

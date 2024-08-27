@@ -19,6 +19,25 @@ Intersection computeIntersection(glm::vec4 src, glm::vec4 dir, Triangle triangle
     return {true, components.z, triangle.a + components.x * u + components.y * v};
 }
 
+cv::Point2f Pose::projectToScreen(Camera& cam, glm::vec3& pos, Render& terrainRenderer) {
+    float ratio = terrainRenderer.width * 1.0 / terrainRenderer.height,
+            fov = -glm::tan(CAMERA_FOV / 2);
+    glm::vec4 proj = glm::vec4(pos, 1) - cam.pos;
+    proj = glm::transpose(cam.rot) * proj;
+    cv::Point2f point = cv::Point2f(proj.x / proj.z / fov, proj.y / proj.z * ratio / fov);
+    LOG_DEBUG("Point on screen: (%.2f, %.2f)",point.x, point.y);
+    return point;
+    // _cam = glm::translate(_cam, glm::vec3(cam.pos));
+    // glm::mat4 proj = glm::perspective(
+    //     CAMERA_FOV,
+    //     (float) ratio,
+    //     0.1f, 100.0f
+    //     ) * _cam;
+    // glm::vec4 point = proj * glm::vec4(pos,1.);
+    //LOG_DEBUG("Point on screen: (%.2f, %.2f)", point.x, point.y);
+    //return glm::vec2(point);
+}
+
 Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render& terrainRenderer)
 {
     /// TODO: Change ratio based on renderer's ratio

@@ -65,7 +65,7 @@ void Program::moveByInput() {
     if (state.input.keyState[VK_OEM_COMMA]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), obsvAngVel, glm::vec3(0,0,1)); }
     if (state.input.keyState[VK_OEM_PERIOD]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), -obsvAngVel, glm::vec3(0,0,1)); }
 }
-
+/*
 void Program::pickByInput() {
     if (state.isMousePressed())
     {   
@@ -92,35 +92,61 @@ void Program::pickByInput() {
         }
     }
 }
-
+*/
 void Program::placeTrackersByInput() {
-    /// TODO: add
+    if (state.isMousePressed())
+    {   
+        cv::Point2f screen(
+            ((state.input.mouseX - terrainRenderer.x) * 1.0 / terrainRenderer.width) * 2 - 1,
+            (1 - (state.input.mouseY - terrainRenderer.y) * 1.0 / terrainRenderer.height) * 2 - 1
+        );
+        Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
+        if (intersection.hit) {
+            trackerPoints.push_back(Point3f(intersection.point));
+            Pose::projectToScreen(obsvCamera, intersection.point, terrainRenderer);
+        }
+    }
 }
 
 void Program::captureByInput() {
-    /// TODO: add
+    if (state.isKeyPressed('B')) {
+        // compute 2d points on screen
+
+    
+        // compute pnp location
+        // add actual and computed cameras
+        // present overlay
+    }
 }
 
 void Program::toggleLocationByInput() {
-    /// TODO: add
+    if (state.isKeyPressed('M')) {
+        // forward
+    }
+    if (state.isKeyPressed('N')) {
+        // backward
+    }
 }
 
 void Program::switchStateByInput() {
     switch (programState) {
         case configuring: {
-            if (state.isKeyPressed('S'))
+            if (state.isKeyPressed('P'))
             {
                 programState = traversing;
             }
         }
         case traversing: {
-            if (state.isKeyPressed('D')) {
+            if (state.isKeyPressed('R') && computedRoute.size() != 0) {
                 programState = reviewing;
             }
         }
         case reviewing: {
-            if (state.isKeyPressed('F')) 
+            if (state.isKeyPressed('F')) {
                 programState = traversing;
+                computedRoute.clear();
+                actualRoute.clear();
+            }
         }
     }
 }
@@ -152,6 +178,8 @@ void Program::update() {
         toggleLocationByInput();
     }
 
+
+    /// TODO: fix
     lines[0] = obsvCamera.pos.x;
     lines[1] = obsvCamera.pos.y;
     lines[2] = obsvCamera.pos.z;
@@ -180,7 +208,7 @@ void Program::draw() {
     
     pointsRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
-    pointsRenderer.renderPoints(pickingPoints);
+    pointsRenderer.renderPoints(trackerPoints);
     glLineWidth(3);
     linesRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     linesRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
@@ -194,7 +222,7 @@ void Program::draw() {
     
     pointsRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
-    pointsRenderer.renderPoints(pickingPoints);
+    pointsRenderer.renderPoints(trackerPoints);
 }
 
 
