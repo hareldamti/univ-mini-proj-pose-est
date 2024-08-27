@@ -19,13 +19,7 @@ void Program::addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeV
     state.createAnimation(&camera->rot, rot, keyframeTimes);
 }
 
-f32 lines[25] = {
-    0, 0, 0, 0, 0
-    -1000, 0, 0, 1, 0,
-    1000, 0, 0, 1, 1,
-    0, -1000, 0, 0, -1,
-    0, 1000, 0, 1, 1, 
-};
+f32 lines[25];
 u32 indices[30] = {
     0, 1, 2,
     0, 1, 3,
@@ -51,6 +45,7 @@ void Program::wrapInit() {
 
     init();
 }
+
 void Program::moveByInput() {
     if (state.input.keyState['W']) {obsvCamera.pos += obsvVel * obsvCamera.rot * glm::vec4(0,0,1,0);}
     if (state.input.keyState['S']) {obsvCamera.pos -= obsvVel * obsvCamera.rot * glm::vec4(0,0,1,0);}
@@ -70,7 +65,6 @@ void Program::moveByInput() {
     if (state.input.keyState[VK_OEM_COMMA]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), obsvAngVel, glm::vec3(0,0,1)); }
     if (state.input.keyState[VK_OEM_PERIOD]) { obsvCamera.rot = obsvCamera.rot * glm::rotate(glm::mat4(1.0f), -obsvAngVel, glm::vec3(0,0,1)); }
 }
-
 
 void Program::pickByInput() {
     if (state.isMousePressed())
@@ -92,79 +86,71 @@ void Program::pickByInput() {
             for (auto p : pickingClicks) LOG_DEBUG("(%f %f)", p.x, p.y);
             Camera computed = Pose::solvePnP(pickingPoints, pickingClicks, terrainRenderer);
             LOG_DEBUG("\nrot:\n%s\npos:\n%s\n\nrot:\n%s\npos:\n%s", format(obsvCamera.rot).c_str(), format(obsvCamera.pos).c_str(),format(computed.rot).c_str(), format(computed.pos).c_str());
-            addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, 2.f}));
+            addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, .5f}));
             pickingPoints.clear();
             pickingClicks.clear();
         }
     }
 }
 
+void Program::placeTrackersByInput() {
+    /// TODO: add
+}
+
+void Program::captureByInput() {
+    /// TODO: add
+}
+
+void Program::toggleLocationByInput() {
+    /// TODO: add
+}
+
 void Program::switchStateByInput() {
     switch (programState) {
-        case traversing: {
-            if (state.isKeyPressed('P')) 
-                programState = picking;
-                pickingPoints.clear();
-                pickingClicks.clear();
+        case configuring: {
+            if (state.isKeyPressed('S'))
+            {
+                programState = traversing;
+            }
         }
-        case picking: {
-            if (state.isKeyPressed('P')) 
+        case traversing: {
+            if (state.isKeyPressed('D')) {
+                programState = reviewing;
+            }
+        }
+        case reviewing: {
+            if (state.isKeyPressed('F')) 
                 programState = traversing;
         }
     }
 }
 
 void Program::init() {
-    // START DEBUG
-    cv::Mat tvec, rvec;
-    cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
-        2.0,    0,          0,   // fx, skew, cx
-        0,          2.0,    0,   // 0, fy, cy
-        0,          0,          1    // 0, 0, 1
-    );
-    cv::Mat distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
-    cv::solvePnP(std::vector<cv::Point3f>({
-        cv::Point3f(1,1,0),
-        cv::Point3f(1,0,0),
-        cv::Point3f(1,-1,0),
-        cv::Point3f(-1,1,0),
-        cv::Point3f(-1,0,0),
-        cv::Point3f(-1,-1,0),
-    }),std::vector<cv::Point2f>({
-        cv::Point2f(0.5,0.6),
-        cv::Point2f(0.5,0),
-        cv::Point2f(0.5,-0.6),
-        cv::Point2f(-0.5,0.5),
-        cv::Point2f(-0.5,0),
-        cv::Point2f(-0.5,-0.5)
-    }),
-    cameraMatrix,distCoeffs,rvec,tvec
-    );
-    LOG_DEBUG("rvec:\n")
-    cv::print(rvec);
-    LOG_DEBUG("tvec:\n")
-    cv::print(tvec);
-    //exit(0);
-    // END DEBUG
-
     obsvCamera.pos = glm::vec4(0.0f);
     obsvCamera.rot = glm::rotate(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0)), glm::pi<float>(), glm::vec3(0,0,1));
-
     obsvCamera.pos.z = 10;
-    programState = traversing;
+    programState = configuring;
 }
 
 void Program::update() { 
+    // Hover camera hovers
     glm::mat4 rotateHover = glm::rotate(glm::mat4(1.0), state.getMillis() / 2000.f, glm::vec3(0,0,1));
     hoverCamera.pos = rotateHover * glm::vec4(0,-20,20,1);
     hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), 3.14f * 1.25f, glm::vec3(1,0,0));
     
+    // States management
     switchStateByInput();
+    if (programState == configuring) {
+        moveByInput();
+        placeTrackersByInput();
+    }
     if (programState == traversing) {
         moveByInput();
-        //deformByInput();
+        captureByInput();
     }
-    if (programState == picking) pickByInput();
+    if (programState == reviewing) {
+        toggleLocationByInput();
+    }
 
     lines[0] = obsvCamera.pos.x;
     lines[1] = obsvCamera.pos.y;

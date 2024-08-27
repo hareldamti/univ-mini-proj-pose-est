@@ -2,7 +2,7 @@
 #include "Render.h"
 #include "Terrain.h"
 
-enum ProgramState { traversing, picking, reviewing };
+enum ProgramState { configuring, traversing, picking, reviewing };
 
 class Program {
     private:
@@ -17,6 +17,9 @@ class Program {
         void moveByInput();
         void pickByInput();
         void switchStateByInput();
+        void placeTrackersByInput();
+        void captureByInput();
+        void toggleLocationByInput();
         
         void addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeValues, std::vector<float> keyframeTimes);
         // state variables
