@@ -4,7 +4,7 @@
 #include "Program.h"
 
 Params params("params.conf");
-State state(int(params.get("width")), int(params.get("height")), false);
+State state(int(params.get("width")), int(params.get("height")), params, false);
 Program program(state);
 
 int initGL(GLvoid)										// All Setup For OpenGL Goes Here
@@ -279,7 +279,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 		program.draw();
 
 		char text[20];
-		sprintf(text, "State: %s", program.programState == configuring ? "configuring" : program.programState == traversing ? "flight mode" : "display");
+		sprintf(text, "State: %s", program.programState == configuring ? "configuring" : program.programState == traversing ? "flight" : "display");
 		TextOut(state.window.hDC, 10, 10, text, 20);
 		Sleep(10);
 		SwapBuffers(state.window.hDC);

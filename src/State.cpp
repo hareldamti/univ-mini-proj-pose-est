@@ -1,14 +1,7 @@
 #include "State.h"
 
-State::State(int width, int height, bool fullscreen):
-    window({width, height, fullscreen}), startTime(0) {}
-
-void State::init(int width, int height, bool fullscreen) {
-    window.width = width;
-    window.height = height;
-    window.fullscreen = fullscreen;
-    startTime = 0;
-}
+State::State(int width, int height, Params& params, bool fullscreen):
+    window({width, height, fullscreen}), params(params), startTime(0) {}
 
 void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)									// Check For Windows Messages
@@ -95,7 +88,6 @@ void State::update() {
         if (animations[i - removed]->animate(getMillis())) {
             delete animations[i - removed];
             animations.erase(animations.begin() + i - removed);
-            LOG_DEBUG("DELETED ANIMATION %d", animations.size());
             removed++;
         }
     }

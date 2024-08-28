@@ -1,7 +1,7 @@
 #pragma once
 #include "State.h"
 
-#define VERTEX_BUFFER_SIZE 1e5
+#define VERTEX_BUFFER_SIZE 1e6
 
 #define CAMERA_FOV PI / 3
 
@@ -28,7 +28,6 @@ class Render {
         void setUniform(const std::string& name, const glm::mat4& value);
         void setUniform(const std::string& name, float value);
         void setUniform(const std::string& name, const glm::vec4& value);
-        void setCamera(const glm::vec3& pos, const glm::vec3& dir);
         void setCamera(const glm::vec3& pos, const glm::mat4& rot);
         void setTexture(u32 textureId);
         void viewport(int x, int y, int width, int height);

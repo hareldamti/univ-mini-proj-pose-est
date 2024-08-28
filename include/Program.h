@@ -1,6 +1,7 @@
 #pragma once
 #include "Render.h"
 #include "Terrain.h"
+#include "Mesh.h"
 
 enum ProgramState { configuring, traversing, picking, reviewing };
 
@@ -9,7 +10,7 @@ class Program {
         State& state;
         Render terrainRenderer, linesRenderer, pointsRenderer;
         Terrain terrain;
-        Camera obsvCamera, hoverCamera;
+        Camera obsvCamera, compCamera, hoverCamera;
         float obsvVel = 0.1f, obsvAngVel = 0.015f;
 
         void init();
@@ -26,7 +27,7 @@ class Program {
         std::vector<cv::Point3f> trackerPoints;
         std::vector<Camera> actualRoute;
         std::vector<Camera> computedRoute;
-        int routeIdx;
+        int routeIndex;
 
     public:
         Program(State& state);

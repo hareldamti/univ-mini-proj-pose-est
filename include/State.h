@@ -46,10 +46,10 @@ class State {
         int currTime;
         std::vector<AnimationHandlerGenericWrapper*> animations;
     public:
-        State(int width, int height, bool fullscreen = false);
-        void init(int width, int height, bool fullscreen = false);
+        State(int width, int height, Params& params, bool fullscreen = false);
         WindowState window;
         InputState input;
+        Params& params;
         void handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
         bool isKeyPressed(int key);
         bool isMousePressed();

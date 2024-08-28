@@ -23,8 +23,8 @@ class Terrain {
         unsigned* indices;
         float xWidth, yWidth, height;
         u32 texture;
-        std::vector<float> vertices_vec;
-        std::vector<unsigned int> indices_vec;
+        std::vector<f32> vertices_vec;
+        std::vector<u32> indices_vec;
         std::vector<Triangle> triangles;
         void loadTexture(const char* heightFile, const char* textureFile, int downsize);
 };

@@ -59,7 +59,9 @@ void Render::createProgram(const std::string& vertexFile, const std::string& fra
     GLCall(glEnableVertexAttribArray(0)); 
     GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
     GLCall(glEnableVertexAttribArray(1));
-
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GLCall(glDisable(GL_CULL_FACE));
     GLCall(glDeleteShader(vertexShader));
     GLCall(glDeleteShader(fragmentShader));
     setUniform("camera", glm::mat4(1.0f));
@@ -69,7 +71,7 @@ void Render::setIndices(const u32* indices, const u32 n) {
     nVertices = (i32)n;
     GLCall(glBindVertexArray(VAO));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
-    GLCall(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(i32) * n, indices));
+    GLCall(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(u32) * n, indices));
 }
 
 void Render::setVertices(const f32* vertices, const i32 n) {
@@ -107,24 +109,6 @@ void Render::setTexture(u32 textureId) {
     GLCall(glBindTexture(GL_TEXTURE_2D, textureId));
 }
 
-void Render::setCamera(const glm::vec3& pos, const glm::vec3& dir) {
-    glm::mat4 cam = glm::mat4(1.0f);
-
-    cam = glm::rotate(cam, -dir.y, glm::vec3(1.0f,0.0f,0.0f));
-    cam = glm::rotate(cam, -dir.x, glm::vec3(0.0f,1.0f,0.0f));
-    cam = glm::rotate(cam,  dir.z, glm::vec3(0.0f,0.0f,1.0f));
-
-
-    cam = glm::translate(cam, -pos);
-    glm::mat4 proj = glm::perspective(
-        CAMERA_FOV,
-        (float) width / height,
-        0.1f, 100.0f
-        ) * cam;
-    
-    setUniform("camera", proj);
-}
-
 void Render::setCamera(const glm::vec3& pos, const glm::mat4& rot) {
     glm::mat4 cam = -glm::transpose(rot);
     cam[3][3] = 1;
@@ -132,7 +116,7 @@ void Render::setCamera(const glm::vec3& pos, const glm::mat4& rot) {
     glm::mat4 proj = glm::perspective(
         CAMERA_FOV,
         (float) width / height,
-        0.1f, 100.0f
+        0.1f, 1000.0f
         ) * cam;
     
     setUniform("camera", proj);

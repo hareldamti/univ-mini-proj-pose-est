@@ -29,7 +29,7 @@ cv::Point2f Pose::projectToScreen(Camera& cam, cv::Point3f& pos, Render& terrain
     glm::vec4 _p = glm::perspective(
         CAMERA_FOV,
         ratio,
-        0.1f, 100.0f
+        0.1f, 1000.0f
         ) * _cam * Vec4(pos);
     
     cv::Point2f _point = cv::Point2f(_p.x/_p.w, _p.y/_p.w);

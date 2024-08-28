@@ -59,10 +59,10 @@ void Terrain::loadTexture(const char* heightFile, const char* textureFile, int d
         }
     }
     //converting vector array 
-    vertices = new float[vertices_vec.size()];
+    vertices = new f32[vertices_vec.size()];
     std::copy(vertices_vec.begin(), vertices_vec.end(), vertices);
 
-    indices = new unsigned int[indices_vec.size()];
+    indices = new u32[indices_vec.size()];
     std::copy(indices_vec.begin(), indices_vec.end(), indices);
 
     // creating triangles vector

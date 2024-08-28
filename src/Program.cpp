@@ -1,12 +1,90 @@
 #include "Program.h"
 #include "Pose.h"
+#include "Mesh.h"
+
+Mesh cameraMesh(
+    std::vector<u32>({
+        0, 1, 2,
+        0, 1, 3,
+        0, 2, 4,
+        0, 3, 4,
+        1, 0, 2,
+        1, 0, 3,
+        0, 4, 2,
+        4, 3, 0
+    }),
+    std::vector<f32>({
+        0,   0,  0,
+        1,  -1,  3,
+        1,   1,  3,
+        -1, -1,  3,
+        -1,  1,  3
+    })
+);
+
+Mesh towerMesh(
+    std::vector<u32>({
+        0, 1, 2,
+        0, 1, 3,
+        0, 2, 4,
+        0, 3, 4,
+        1, 0, 2,
+        1, 0, 3,
+        0, 4, 2,
+        4, 3, 0,
+        1, 2, 6,
+        1, 6, 2,
+        1, 5, 6, 
+        1, 6, 5,
+        1, 3, 7,
+        1, 7, 3,
+        1, 5, 7,
+        1, 7, 5,
+        3, 4, 7,
+        3, 7, 4,
+        2, 4, 6,
+        2, 6, 4,
+        2, 4, 8,
+        2, 8, 4,
+        5, 6, 9,
+        5, 7, 9, 
+        5, 9, 10,
+        6, 8, 10,
+        6, 12, 10,
+        8, 12, 11, 
+        8, 7, 12, 
+        8, 12, 7, 
+        7, 8, 11, 
+        7, 11, 8, 
+        7, 11, 5, 
+        7, 5, 11,
+        9, 10, 11,
+        11, 12, 10
+
+    }),
+    std::vector<f32>({
+        0,   0,  0,     //0
+        1,  -1,  6,     //1
+        1,   1,  6,     //2
+        -1, -1,  6,     //3
+        -1,  1,  6,     //4
+        2,  -2,  12,    //5
+        2,   2,  12,    //6
+        -2, -2,  12,    //7
+        -2,  2,  12,    //8
+        3,  -3,  18,    //9
+        3,   3,  18,    //10
+        -3, -3,  18,    //11
+        -3,  3,  18,    //12
+    })
+);
 
 Program::Program(State& state) :
     state(state),
     terrainRenderer(state),
     linesRenderer(state),
     pointsRenderer(state),
-    terrain(20, 1){}
+    terrain(state.params.get("terrain-width"), state.params.get("terrain-height")){}
 
 void Program::addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeValues, std::vector<float> keyframeTimes) {
     std::vector<glm::vec4> pos;
@@ -19,24 +97,13 @@ void Program::addCameraAnimation(Camera* camera, std::vector<Camera>&& keyframeV
     state.createAnimation(&camera->rot, rot, keyframeTimes);
 }
 
-f32 lines[25];
-u32 indices[30] = {
-    0, 1, 2,
-    0, 1, 3,
-    0, 2, 4,
-    0, 3, 4,
-    1, 0, 2,
-    1, 0, 3,
-    0, 4, 2,
-    4, 3, 0,
-};
-
 void Program::wrapInit() {
     // Terrain and terrain shader
-    terrain.loadTexture("height.png", "shrek.png", 6);
+    terrain.loadTexture("height.png", "arial.jpg", state.params.get("downsize"));
+    if (terrain.vertices_vec.size() > VERTEX_BUFFER_SIZE) ERROR_EXIT("Vertex buffer size limit (%d) exceeded - %d", VERTEX_BUFFER_SIZE, terrain.vertices_vec.size());
     terrainRenderer.createProgram("shaders/default.vert", "shaders/texture.frag");
-    terrainRenderer.setIndices(terrain.indices, terrain.indices_vec.size());
-    terrainRenderer.setVertices(terrain.vertices, terrain.vertices_vec.size() / 5);
+    terrainRenderer.setIndices(&terrain.indices_vec[0], terrain.indices_vec.size());
+    terrainRenderer.setVertices(&terrain.vertices_vec[0], terrain.vertices_vec.size() / 5);
     terrainRenderer.setTexture(terrain.texture);
 
     // Lines and points shader
@@ -102,6 +169,7 @@ void Program::placeTrackersByInput() {
         );
         Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
         if (intersection.hit) {
+            intersection.point.z += 2;
             trackerPoints.push_back(Point3f(intersection.point));
         }
     }
@@ -114,7 +182,6 @@ void Program::captureByInput() {
             screenPoints.push_back(Pose::projectToScreen(obsvCamera, trackerPoint, terrainRenderer));
         }
         Camera computed = Pose::solvePnP(trackerPoints, screenPoints, terrainRenderer);
-        addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, .5f}));
         computedRoute.push_back(computed);
         actualRoute.push_back(obsvCamera);
         // compute pnp location
@@ -125,17 +192,22 @@ void Program::captureByInput() {
 
 void Program::toggleLocationByInput() {
     if (state.isKeyPressed('M')) {
-        // forward
+        routeIndex = (++routeIndex + actualRoute.size()) % actualRoute.size();
+        addCameraAnimation(&obsvCamera, std::vector({obsvCamera, actualRoute.at(routeIndex)}), std::vector({0.f, state.params.get("camera-animation-duration")}));
+        addCameraAnimation(&compCamera, std::vector({compCamera, computedRoute.at(routeIndex)}), std::vector({0.f, state.params.get("camera-animation-duration")}));
+    
     }
     if (state.isKeyPressed('N')) {
-        // backward
+        routeIndex = (--routeIndex + actualRoute.size()) % actualRoute.size();
+        addCameraAnimation(&compCamera, std::vector({compCamera, computedRoute.at(routeIndex)}), std::vector({0.f, state.params.get("camera-animation-duration")}));
+        addCameraAnimation(&obsvCamera, std::vector({obsvCamera, actualRoute.at(routeIndex)}), std::vector({0.f, state.params.get("camera-animation-duration")}));
     }
 }
 
 void Program::switchStateByInput() {
     switch (programState) {
         case configuring: {
-            if (state.isKeyPressed('P'))
+            if (state.isKeyPressed('P') && trackerPoints.size() >= 6)
             {
                 programState = traversing;
             }
@@ -143,6 +215,10 @@ void Program::switchStateByInput() {
         case traversing: {
             if (state.isKeyPressed('R') && computedRoute.size() != 0) {
                 programState = reviewing;
+                routeIndex = 0;
+                compCamera = obsvCamera;
+                addCameraAnimation(&compCamera, std::vector({compCamera, computedRoute.at(routeIndex)}), std::vector({0.f, state.params.get("camera-animation-duration")}));
+                addCameraAnimation(&obsvCamera, std::vector({obsvCamera, actualRoute.at(routeIndex)}), std::vector({0.f, state.params.get("camera-animation-duration")}));
             }
         }
         case reviewing: {
@@ -164,8 +240,8 @@ void Program::init() {
 
 void Program::update() { 
     // Hover camera hovers
-    glm::mat4 rotateHover = glm::rotate(glm::mat4(1.0), state.getMillis() / 2000.f, glm::vec3(0,0,1));
-    hoverCamera.pos = rotateHover * glm::vec4(0,-20,20,1);
+    glm::mat4 rotateHover = glm::rotate(glm::mat4(1.0), state.getMillis() * 3.14f / 500 / state.params.get("hover-rotation-duration"), glm::vec3(0,0,1));
+    hoverCamera.pos = rotateHover * glm::vec4(0,-state.params.get("hover-distance"),state.params.get("hover-distance"),1);
     hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), 3.14f * 1.25f, glm::vec3(1,0,0));
     
     // States management
@@ -182,51 +258,80 @@ void Program::update() {
         toggleLocationByInput();
     }
 
+    Mesh elements;
+    for (int i = 0; i < actualRoute.size(); i++) {
+        elements.add(cameraMesh, actualRoute[i].pos, actualRoute[i].rot, 0.3, 0);
+        elements.add(cameraMesh, computedRoute[i].pos, computedRoute[i].rot, 0.7, 0);
+    }
+    if (actualRoute.size() > 1) {
+        Mesh actualRouteMesh = Mesh::fromRoute(actualRoute), computedRouteMesh = Mesh::fromRoute(computedRoute);
+        elements.add(actualRouteMesh, 0.3, 0);
+        elements.add(computedRouteMesh, 0.7, 0); 
+    }
+    elements.add(cameraMesh, obsvCamera.pos, obsvCamera.rot, 0, 0);
+    if (programState == reviewing) elements.add(cameraMesh, compCamera.pos, compCamera.rot, 1, 0);
 
-    /// TODO: fix
-    lines[0] = obsvCamera.pos.x;
-    lines[1] = obsvCamera.pos.y;
-    lines[2] = obsvCamera.pos.z;
-    lines[5] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,-1,3,0)).x;
-    lines[6] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,-1,3,0)).y;
-    lines[7] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,-1,3,0)).z;
-    lines[10] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,1,3,0)).x;
-    lines[11] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,1,3,0)).y;
-    lines[12] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(1,1,3,0)).z;
-    lines[15] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,-1,3,0)).x;
-    lines[16] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,-1,3,0)).y;
-    lines[17] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,-1,3,0)).z;
-    lines[20] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,1,3,0)).x;
-    lines[21] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,1,3,0)).y;
-    lines[22] = (obsvCamera.pos + obsvCamera.rot * glm::vec4(-1,1,3,0)).z;
-    linesRenderer.setVertices(lines, 5);
-    linesRenderer.setIndices(indices, 30);
+    for (cv::Point3f& tracker : trackerPoints) {
+        glm::vec4 point = Vec4(tracker);
+        glm::mat4 resize(-0.2);
+        elements.add(towerMesh, point, resize, 0, 0);
+    }
+
+    linesRenderer.setVertices(&elements.vertices[0], elements.vertices.size() / 5);
+    linesRenderer.setIndices(&elements.indices[0], elements.indices.size());
 }
 
 void Program::draw() {
-    glPointSize(5);
+    GLCall(glEnable(GL_DEPTH_TEST));
+
+    // Hover camera terrain
     glLineWidth(1);
+    terrainRenderer.setUniform("tint", glm::vec4(1.0f));
     terrainRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     terrainRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
-    terrainRenderer.render(GL_LINES);
+    terrainRenderer.render(programState == configuring ? GL_LINES : GL_TRIANGLES);
     
+    // Hover camera trackers
+    glPointSize(5);
     pointsRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     pointsRenderer.renderPoints(trackerPoints);
+
+    // Hover camera obsv
     glLineWidth(3);
+    linesRenderer.setUniform("color", glm::vec4(1.f));
     linesRenderer.viewport(0, 0, state.window.width/2., state.window.height);
     linesRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     linesRenderer.render(GL_LINES);
 
-    // Picking view rendered last
-    glPointSize(15);
+    // Obsv camera terrain
+    terrainRenderer.setUniform("tint", glm::vec4(1.f));
     terrainRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     terrainRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
-    terrainRenderer.render();
+    terrainRenderer.render(programState == configuring ? GL_LINES : GL_TRIANGLES);
     
+    // Obsv camera trackers
+    glPointSize(15);
     pointsRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     pointsRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
     pointsRenderer.renderPoints(trackerPoints);
+
+    if (programState == reviewing) {
+        // Computed camera terrain
+        GLCall(glDisable(GL_DEPTH_TEST));
+        terrainRenderer.setUniform("tint", glm::vec4(1,0.5,0,0.6));
+        terrainRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
+        terrainRenderer.setCamera(compCamera.pos, compCamera.rot);
+        terrainRenderer.render();
+    }
+    
+    
+    // // Computed camera trackers
+    // glPointSize(15);
+    // pointsRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
+    // pointsRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
+    // pointsRenderer.renderPoints(trackerPoints);
+    
 }
 
 
