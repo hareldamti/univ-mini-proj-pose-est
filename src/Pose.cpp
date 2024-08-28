@@ -19,7 +19,7 @@ Intersection computeIntersection(glm::vec4 src, glm::vec4 dir, Triangle triangle
     return {true, components.z, triangle.a + components.x * u + components.y * v};
 }
 
-cv::Point2f Pose::projectToScreen(Camera& cam, glm::vec3& pos, Render& terrainRenderer) {
+cv::Point2f Pose::projectToScreen(Camera& cam, cv::Point3f& pos, Render& terrainRenderer) {
     float ratio = terrainRenderer.width * 1.0 / terrainRenderer.height,
             fov = -glm::tan(CAMERA_FOV / 2);
     // glm::vec4 proj = glm::vec4(pos, 1) - cam.pos;
@@ -34,7 +34,7 @@ cv::Point2f Pose::projectToScreen(Camera& cam, glm::vec3& pos, Render& terrainRe
         CAMERA_FOV,
         ratio,
         0.1f, 100.0f
-        ) * _cam * glm::vec4(pos, 1);
+        ) * _cam * Vec4(pos);
     
     cv::Point2f _point = cv::Point2f(_p.x/_p.w, _p.y/_p.w);
     LOG_DEBUG("Point on screen: (%.2f, %.2f)", _point.x, _point.y);
@@ -70,7 +70,7 @@ Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render
     return closestIntersection;
 }
 
-Camera Pose::solvePnP(std::vector<cv::Point3f> points, std::vector<cv::Point2f> screen, Render& terrainRenderer) {
+Camera Pose::solvePnP(std::vector<cv::Point3f>& points, std::vector<cv::Point2f>& screen, Render& terrainRenderer) {
     float fov = -glm::tan(CAMERA_FOV / 2);
     cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
         1.0/fov,    0,          0,   // fx, skew, cx

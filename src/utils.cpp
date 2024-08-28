@@ -49,9 +49,14 @@ glm::mat4 Mat4(cv::Mat& mat) {
     return m;
 }
 
-glm::vec4 Vec4(cv::Mat tvec) {
+glm::vec4 Vec4(cv::Mat& tvec) {
     return glm::vec4(tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2), 1);
 }
+
+glm::vec4 Vec4(cv::Point3f& point) {
+    return glm::vec4(point.x, point.y, point.z, 1);
+}
+
 std::string format(glm::mat4 m) {
     return std::format( 
         "{}\t{}\t{}\t{}\n{}\t{}\t{}\t{}\n{}\t{}\t{}\t{}\n{}\t{}\t{}\t{}",

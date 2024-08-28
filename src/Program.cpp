@@ -103,16 +103,20 @@ void Program::placeTrackersByInput() {
         Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
         if (intersection.hit) {
             trackerPoints.push_back(Point3f(intersection.point));
-            Pose::projectToScreen(obsvCamera, intersection.point, terrainRenderer);
         }
     }
 }
 
 void Program::captureByInput() {
     if (state.isKeyPressed('B')) {
-        // compute 2d points on screen
+        std::vector<cv::Point2f> screenPoints;
+        for (cv::Point3f& trackerPoint : trackerPoints) {
+            screenPoints.push_back(Pose::projectToScreen(obsvCamera, trackerPoint, terrainRenderer));
+        }
+        Camera computed = Pose::solvePnP(trackerPoints, screenPoints, terrainRenderer);
+        addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, .5f}));
+        trackerPoints.clear();
 
-    
         // compute pnp location
         // add actual and computed cameras
         // present overlay

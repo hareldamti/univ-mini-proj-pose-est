@@ -52,7 +52,8 @@ std::string readFile(const std::string& file_path);
 cv::Point2f Point2f(glm::vec2& point);
 cv::Point3f Point3f(glm::vec3& point);
 glm::mat4 Mat4(cv::Mat& mat);
-glm::vec4 Vec4(cv::Mat tvec);
+glm::vec4 Vec4(cv::Mat& tvec);
+glm::vec4 Vec4(cv::Point3f& point);
 
 std::string format(glm::mat4 m);
 std::string format(glm::vec4 m);
