@@ -33,7 +33,7 @@ u32 indices[30] = {
 
 void Program::wrapInit() {
     // Terrain and terrain shader
-    terrain.loadTexture("shrek.png", "shrek.png", 6);
+    terrain.loadTexture("height.png", "shrek.png", 6);
     terrainRenderer.createProgram("shaders/default.vert", "shaders/texture.frag");
     terrainRenderer.setIndices(terrain.indices, terrain.indices_vec.size());
     terrainRenderer.setVertices(terrain.vertices, terrain.vertices_vec.size() / 5);
@@ -115,8 +115,8 @@ void Program::captureByInput() {
         }
         Camera computed = Pose::solvePnP(trackerPoints, screenPoints, terrainRenderer);
         addCameraAnimation(&obsvCamera, std::vector({obsvCamera, computed}), std::vector({0.f, .5f}));
-        trackerPoints.clear();
-
+        computedRoute.push_back(computed);
+        actualRoute.push_back(obsvCamera);
         // compute pnp location
         // add actual and computed cameras
         // present overlay

@@ -22,11 +22,7 @@ Intersection computeIntersection(glm::vec4 src, glm::vec4 dir, Triangle triangle
 cv::Point2f Pose::projectToScreen(Camera& cam, cv::Point3f& pos, Render& terrainRenderer) {
     float ratio = terrainRenderer.width * 1.0 / terrainRenderer.height,
             fov = -glm::tan(CAMERA_FOV / 2);
-    // glm::vec4 proj = glm::vec4(pos, 1) - cam.pos;
-    // proj = glm::transpose(cam.rot) * proj;
-    // cv::Point2f point = cv::Point2f(proj.x / proj.z / fov, proj.y / proj.z * ratio / fov);
-    //LOG_DEBUG("Point on screen: (%.2f, %.2f)",point.x, point.y);
-    
+
     glm::mat4 _cam = -glm::transpose(cam.rot);
     _cam[3][3] = 1;
     _cam = glm::translate(_cam, -glm::vec3(cam.pos));
@@ -37,7 +33,6 @@ cv::Point2f Pose::projectToScreen(Camera& cam, cv::Point3f& pos, Render& terrain
         ) * _cam * Vec4(pos);
     
     cv::Point2f _point = cv::Point2f(_p.x/_p.w, _p.y/_p.w);
-    LOG_DEBUG("Point on screen: (%.2f, %.2f)", _point.x, _point.y);
 
     return _point;
 }

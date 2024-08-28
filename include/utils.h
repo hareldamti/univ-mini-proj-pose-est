@@ -48,6 +48,8 @@ typedef double f64;
 void _glClearError();
 bool _glCatchError(const char* func_name, const char* file, int line);
 std::string readFile(const std::string& file_path);
+void loadParametersFile();
+f32 getParam(std::string name);
 
 cv::Point2f Point2f(glm::vec2& point);
 cv::Point3f Point3f(glm::vec3& point);
@@ -57,3 +59,10 @@ glm::vec4 Vec4(cv::Point3f& point);
 
 std::string format(glm::mat4 m);
 std::string format(glm::vec4 m);
+
+class Params {
+    public:
+        Params(std::string filename);
+        std::map<std::string, f32> params;
+        f32 get(std::string name);
+};

@@ -3,6 +3,13 @@
 State::State(int width, int height, bool fullscreen):
     window({width, height, fullscreen}), startTime(0) {}
 
+void State::init(int width, int height, bool fullscreen) {
+    window.width = width;
+    window.height = height;
+    window.fullscreen = fullscreen;
+    startTime = 0;
+}
+
 void State::handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)									// Check For Windows Messages
 	{

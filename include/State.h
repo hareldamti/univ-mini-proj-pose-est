@@ -47,6 +47,7 @@ class State {
         std::vector<AnimationHandlerGenericWrapper*> animations;
     public:
         State(int width, int height, bool fullscreen = false);
+        void init(int width, int height, bool fullscreen = false);
         WindowState window;
         InputState input;
         void handleInput(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

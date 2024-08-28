@@ -11,7 +11,6 @@ class Program {
         Terrain terrain;
         Camera obsvCamera, hoverCamera;
         float obsvVel = 0.1f, obsvAngVel = 0.015f;
-        ProgramState programState;
 
         void init();
         void moveByInput();
@@ -31,6 +30,7 @@ class Program {
 
     public:
         Program(State& state);
+        ProgramState programState;
         void wrapInit();
         void update();
         void draw();
