@@ -12,7 +12,6 @@ typedef struct Camera {
 
 class Render {
     private:
-        State& m_state;
         u32 VBO;
         u32 VAO;
         u32 EBO;
@@ -21,6 +20,7 @@ class Render {
         
     public:
         Render(State& state);
+        State& m_state;
         i32 x, y, width, height;
         void createProgram(const std::string& vertexFile, const std::string& fragmentFile);
         void setIndices(const u32* indices, const u32 n);

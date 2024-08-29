@@ -71,7 +71,7 @@ std::string format(glm::vec4 v) {
         v[0], v[1], v[2], v[3]); 
 }
 
-Params::Params(std::string filename) {
+Params::Params(std::string filename):filename(filename) {
     std::ifstream file(filename);
     if (!file.is_open()) ERROR_EXIT("Config file %s not found\n", filename.c_str());
 
@@ -84,9 +84,28 @@ Params::Params(std::string filename) {
         params[name] = value;
         if (stream.fail()) ERROR_EXIT("Config file invalid\n");
     }
+    file.close();
 }
 
 f32 Params::get(std::string name) {
+    if (!params.contains(name)) ERROR_EXIT("Parameter %s not requested but not found\n", name.c_str());
+    return params[name];
+}
+
+f32 Params::getDebug(std::string name) {
+    std::ifstream file(filename);
+    if (!file.is_open()) ERROR_EXIT("Config file %s not found\n", filename.c_str());
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::string name;
+        f32 value;
+        std::istringstream stream(line);
+        stream >> name >> value;
+        params[name] = value;
+        if (stream.fail()) ERROR_EXIT("Config file invalid\n");
+    }
+    file.close();
     if (!params.contains(name)) ERROR_EXIT("Parameter %s not requested but not found\n", name.c_str());
     return params[name];
 }

@@ -66,7 +66,7 @@ Intersection Pose::cast(Camera cam, cv::Point2f screen, Terrain& terrain, Render
 }
 
 Camera Pose::solvePnP(std::vector<cv::Point3f>& points, std::vector<cv::Point2f>& screen, Render& terrainRenderer) {
-    float fov = -glm::tan(CAMERA_FOV / 2);
+    float fov = -glm::tan(CAMERA_FOV / 2 * terrainRenderer.m_state.params.getDebug("fov-correction"));
     cv::Mat cameraMatrix = (cv::Mat_<float>(3, 3) <<
         1.0/fov,    0,          0,   // fx, skew, cx
         0,          1.0/fov,    0,   // 0, fy, cy

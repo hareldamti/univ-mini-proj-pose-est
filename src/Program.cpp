@@ -114,6 +114,9 @@ void Program::wrapInit() {
 }
 
 void Program::moveByInput() {
+    if (state.input.keyState['O']) {hoverDistance -= obsvVel;}
+    if (state.input.keyState['L']) {hoverDistance += obsvVel;}
+
     if (state.input.keyState['W']) {obsvCamera.pos += obsvVel * obsvCamera.rot * glm::vec4(0,0,1,0);}
     if (state.input.keyState['S']) {obsvCamera.pos -= obsvVel * obsvCamera.rot * glm::vec4(0,0,1,0);}
     
@@ -169,8 +172,8 @@ void Program::placeTrackersByInput() {
         );
         Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
         if (intersection.hit) {
-            intersection.point.z += 2;
             trackerPoints.push_back(Point3f(intersection.point));
+            state.createAnimation(&trackerPoints.at(trackerPoints.size()-1).z, std::vector({intersection.point.z, intersection.point.z + 2}), std::vector({0.f,1.f}));
         }
     }
 }
@@ -178,8 +181,20 @@ void Program::placeTrackersByInput() {
 void Program::captureByInput() {
     if (state.isKeyPressed('B')) {
         std::vector<cv::Point2f> screenPoints;
+        std::vector<cv::Point3f> actualPoints;
         for (cv::Point3f& trackerPoint : trackerPoints) {
-            screenPoints.push_back(Pose::projectToScreen(obsvCamera, trackerPoint, terrainRenderer));
+
+            cv::Point2f screen = Pose::projectToScreen(obsvCamera, trackerPoint, terrainRenderer);
+            Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
+            if (intersection.hit && glm::length(Vec4(trackerPoint) - obsvCamera.pos) - intersection.distance < 0.1f ) {
+                screen.x = (std::floor(screen.x * state.params.get("cam-res")) + 0.5f) / state.params.get("cam-res");
+                screen.y = (std::floor(screen.y * state.params.get("cam-res")) + 0.5f) / state.params.get("cam-res");
+                actualPoints.push_back(trackerPoint);
+                screenPoints.push_back(screen);
+            }
+        }
+        if (screenPoints.size() < 6) {
+            return;
         }
         Camera computed = Pose::solvePnP(trackerPoints, screenPoints, terrainRenderer);
         computedRoute.push_back(computed);
@@ -236,12 +251,13 @@ void Program::init() {
     obsvCamera.rot = glm::rotate(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(1,0,0)), glm::pi<float>(), glm::vec3(0,0,1));
     obsvCamera.pos.z = 10;
     programState = configuring;
+    hoverDistance = state.params.get("hover-distance");
 }
 
 void Program::update() { 
     // Hover camera hovers
     glm::mat4 rotateHover = glm::rotate(glm::mat4(1.0), state.getMillis() * 3.14f / 500 / state.params.get("hover-rotation-duration"), glm::vec3(0,0,1));
-    hoverCamera.pos = rotateHover * glm::vec4(0,-state.params.get("hover-distance"),state.params.get("hover-distance"),1);
+    hoverCamera.pos = rotateHover * glm::vec4(0,-hoverDistance,hoverDistance,1);
     hoverCamera.rot = rotateHover * glm::rotate(glm::mat4(1.0), 3.14f * 1.25f, glm::vec3(1,0,0));
     
     // States management
@@ -273,7 +289,7 @@ void Program::update() {
 
     for (cv::Point3f& tracker : trackerPoints) {
         glm::vec4 point = Vec4(tracker);
-        glm::mat4 resize(-0.2);
+        glm::mat4 resize(-0.12);
         elements.add(towerMesh, point, resize, 0, 0);
     }
 
@@ -304,12 +320,21 @@ void Program::draw() {
     linesRenderer.setCamera(hoverCamera.pos, hoverCamera.rot);
     linesRenderer.render(GL_LINES);
 
+    if (programState == configuring) {
+        // Obsv camera towers
+        glLineWidth(3);
+        linesRenderer.setUniform("color", glm::vec4(1.f));
+        linesRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
+        linesRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
+        linesRenderer.render(GL_LINES);
+    }
     // Obsv camera terrain
     terrainRenderer.setUniform("tint", glm::vec4(1.f));
     terrainRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);
     terrainRenderer.setCamera(obsvCamera.pos, obsvCamera.rot);
     terrainRenderer.render(programState == configuring ? GL_LINES : GL_TRIANGLES);
     
+
     // Obsv camera trackers
     glPointSize(15);
     pointsRenderer.viewport(state.window.width/2., 0, state.window.width/2., state.window.height);

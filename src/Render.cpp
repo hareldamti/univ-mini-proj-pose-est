@@ -149,8 +149,8 @@ void Render::renderPoints(std::vector<cv::Point3f> points) {
         data[5*i] = points[i].x;
         data[5*i+1] = points[i].y;
         data[5*i+2] = points[i].z;
-        data[5*i+3] = rand()*1.0/RAND_MAX;
-        data[5*i+4] = rand()*1.0/RAND_MAX;
+        data[5*i+3] = (i + 0.5) * 1.0 / points.size();
+        data[5*i+4] = m_state.getMillis() * 1.0 / 1000;
     }
     setIndices(idx, points.size());
     setVertices(data, points.size());

@@ -62,7 +62,9 @@ std::string format(glm::vec4 m);
 
 class Params {
     public:
+        std::string filename;
         Params(std::string filename);
         std::map<std::string, f32> params;
         f32 get(std::string name);
+        f32 getDebug(std::string name);
 };

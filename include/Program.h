@@ -11,7 +11,8 @@ class Program {
         Render terrainRenderer, linesRenderer, pointsRenderer;
         Terrain terrain;
         Camera obsvCamera, compCamera, hoverCamera;
-        float obsvVel = 0.1f, obsvAngVel = 0.015f;
+        f32 obsvVel = 0.1f, obsvAngVel = 0.015f;
+        f32 hoverDistance;
 
         void init();
         void moveByInput();

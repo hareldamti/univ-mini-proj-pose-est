@@ -40,7 +40,7 @@ Mesh Mesh::fromRoute(std::vector<Camera>& route) {
     for (int i = 0; i < route.size() - 1; i++) {
         m.indices.push_back(i);
         m.indices.push_back(i+1);
-        m.indices.push_back(i);
+        //m.indices.push_back(i);
     }
     return m;
 }

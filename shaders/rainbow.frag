@@ -9,4 +9,6 @@ void main()
         0.5 + 0.5 * sin(TexCoord.y * 10),
         0.5 + 0.5 * sin((TexCoord.x - TexCoord.y) * 4),
         1.0);
+    FragColor = vec4(1,0,0,1) * sin(TexCoord.x * TexCoord.y * 50);
+    FragColor.w = 1;
 }

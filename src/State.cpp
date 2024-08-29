@@ -151,6 +151,8 @@ void State::createAnimation(T* ptr, std::vector<T>&& keyframeValues, std::vector
 }
 
 // animation types instantiation
+template void State::createAnimation(glm::f32* ptr, std::vector<f32>&& keyframeValues, std::vector<float>&& keyframeTimes);
+template void State::createAnimation(glm::f32* ptr, std::vector<f32>&  keyframeValues, std::vector<float>&  keyframeTimes);
 template void State::createAnimation(glm::vec4* ptr, std::vector<glm::vec4>&& keyframeValues, std::vector<float>&& keyframeTimes);
 template void State::createAnimation(glm::vec4* ptr, std::vector<glm::vec4>&  keyframeValues, std::vector<float>&  keyframeTimes);
 template void State::createAnimation(glm::mat4* ptr, std::vector<glm::mat4>&& keyframeValues, std::vector<float>&& keyframeTimes);
