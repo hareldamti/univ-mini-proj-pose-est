@@ -183,22 +183,20 @@ void Program::captureByInput() {
         std::vector<cv::Point2f> screenPoints;
         std::vector<cv::Point3f> actualPoints;
         for (cv::Point3f& trackerPoint : trackerPoints) {
-
             cv::Point2f screen = Pose::projectToScreen(obsvCamera, trackerPoint, terrainRenderer);
             Intersection intersection = Pose::cast(obsvCamera, screen, terrain, terrainRenderer);
             if (intersection.hit && glm::length(Vec4(trackerPoint) - obsvCamera.pos) - intersection.distance < 0.1f ) {
-                screen.x = (std::floor(screen.x * state.params.get("cam-res")) + 0.5f) / state.params.get("cam-res");
-                screen.y = (std::floor(screen.y * state.params.get("cam-res")) + 0.5f) / state.params.get("cam-res");
+                screen.x = (std::floor(screen.x * state.params.getDebug("cam-res")) + 0.5f) / state.params.getDebug("cam-res");
+                screen.y = (std::floor(screen.y * state.params.getDebug("cam-res")) + 0.5f) / state.params.getDebug("cam-res");
                 actualPoints.push_back(trackerPoint);
                 screenPoints.push_back(screen);
             }
         }
-        if (screenPoints.size() < 6) {
-            return;
+        if (screenPoints.size() >= 6) {
+            Camera computed = Pose::solvePnP(actualPoints, screenPoints, terrainRenderer);
+            computedRoute.push_back(computed);
+            actualRoute.push_back(obsvCamera);
         }
-        Camera computed = Pose::solvePnP(trackerPoints, screenPoints, terrainRenderer);
-        computedRoute.push_back(computed);
-        actualRoute.push_back(obsvCamera);
         // compute pnp location
         // add actual and computed cameras
         // present overlay
