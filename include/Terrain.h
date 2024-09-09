@@ -7,27 +7,24 @@
 #include <vector>
 #include "stb_image.h"
 #include "GraphicsUtils.h"
+#include "utils.h"
 
-#define Z_SIZE 1.0
-#define X_SIZE 5.0
-
+typedef struct Triangle {
+    glm::vec3 a;
+    glm::vec3 b;
+    glm::vec3 c;
+} Triangle;
 
 class Terrain {
-    private:
-
-        float Y_SIZE;
-        int color_depth;
-        //std::vector<Triangle> triangles;
-        
     public:
-
-        Terrain(const char* filename, int downsize);
+        Terrain(float xWidth, float height);
         ~Terrain();
-        
         float* vertices;
         unsigned* indices;
-        std::vector<float> vertices_vec;
-        std::vector<unsigned int> indices_vec;
+        float xWidth, yWidth, height;
+        u32 texture;
+        std::vector<f32> vertices_vec;
+        std::vector<u32> indices_vec;
         std::vector<Triangle> triangles;
-
+        void loadTexture(const char* heightFile, const char* textureFile, int downsize);
 };

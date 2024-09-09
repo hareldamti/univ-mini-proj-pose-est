@@ -3,16 +3,12 @@
 #include "State.h"
 #include "Program.h"
 
-State state(800, 600, false);
+Params params("params.conf");
+State state(int(params.get("width")), int(params.get("height")), params, false);
 Program program(state);
 
 int initGL(GLvoid)										// All Setup For OpenGL Goes Here
 {
-	// if (!LoadGLTextures())								// Jump To Texture Loading Routine
-	// {
-	// 	return FALSE;									// If Texture Didn't Load Return FALSE
-	// }
-
 	glEnable(GL_TEXTURE_2D);							// Enable Texture Mapping
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);					// Set The Blending Function For Translucency
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);				// This Will Clear The Background Color To Black
@@ -262,7 +258,8 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 					int			nCmdShow)			// Window Show State
 {
     state.window.shouldQuit = !createGLWindow("Pose Estimation", state.window.width, state.window.height);
-	program.init();
+	program.wrapInit();
+	state.init();
 	MSG	msg;
     while (!state.window.shouldQuit) {
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
@@ -277,8 +274,13 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
+		state.update();
 		program.update();
 		program.draw();
+
+		char text[20];
+		sprintf(text, "State: %s", program.programState == configuring ? "configuring" : program.programState == traversing ? "flight" : "display");
+		TextOut(state.window.hDC, 10, 10, text, 20);
 		Sleep(10);
 		SwapBuffers(state.window.hDC);
     };
